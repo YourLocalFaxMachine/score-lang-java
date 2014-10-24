@@ -1,0 +1,29 @@
+shopt -s globstar
+shopt -s extglob
+
+# Clean out the bin
+rm -r bin
+mkdir bin
+
+# Compiles the language:
+cd src
+echo "Compiling files..."
+javac -d ../bin -sourcepath src **/*.java
+
+# Copy files to bin.
+echo "Copying files..."
+cp -r . ../bin
+cd ../
+
+# Removes copied .java files from the binary folder
+cd bin
+echo "Removing all .java files from bin..."
+rm **/*.java
+cd ../
+
+echo "Finished!"
+echo "----------------------------------------------------------------------------------------------------"
+
+cd bin
+java ScoreTest
+cd ../
