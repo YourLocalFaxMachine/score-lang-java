@@ -1,0 +1,19 @@
+int fNum = 10;
+
+int prevVal = 1;
+int prevPrevVal = 0;
+int n = 1;
+
+while (n++ < fNum) {
+	int currVal = prevVal + prevPrevVal;
+	prevPrevVal = prevVal;
+	prevVal = currVal;
+}
+
+println prevVal;
+
+int idx;
+while (true) {
+	println idx++;
+	sleep .25;
+}
