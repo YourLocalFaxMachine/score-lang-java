@@ -49,4 +49,6 @@ public class ScoreOpCode {
 	public static final byte BOOLNOTNOT	= 0x47;
 	public static final byte ABS		= 0x48;
 	
+	public static final byte MKARRAY	= 0x50;
+	
 }

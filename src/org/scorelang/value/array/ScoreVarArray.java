@@ -12,10 +12,25 @@ public class ScoreVarArray extends ScoreValueArray<ScoreValue> {
     public ScoreVarArray(int initialSize) {
         super(initialSize);
     }
+    
+    public ScoreVarArray(ScoreValue[] values) {
+        this();
+        set(values);
+    }
 	
 	@Override
 	public byte getType() {
 		return ScoreObject.VAR_ARRAY;
+	}
+	
+	public ScoreValue[] get() {
+	    return toArray(new ScoreValue[size()]);
+	}
+	
+	public void set(ScoreValue[] values) {
+	    clear();
+	    for (int i = 0; i < values.length; i++)
+	        push(values[i]);
 	}
     
 }

@@ -1,3 +1,20 @@
-int[] arri;
+bool toggle;
+bool[] arrb = bool[] { true, toggle, false };
 
-println "arri =", arri;
+char c = 'c';
+char[] arrc = char[] { 'a', 'b', c, 'z', '\'' };
+
+float pi = 3.14159265358979;
+float[] arrf = float[] { 1.0f, 3, pi, (5 + 6.3), 92f };
+
+int minusTen = -10;
+int[] arri = int[] { 1, <int> pi, 2, 6, 5, 9, |minusTen| };
+
+string hello = "Hello";
+string[] arrs = string[] { hello, "world!" };
+
+println typeof arrb, "arrb =", arrb;
+println typeof arrc, "arrc =", arrc;
+println typeof arrf, "arrf =", arrf;
+println typeof arri, "arri =", arri;
+println typeof arrs, "arrs =", arrs;

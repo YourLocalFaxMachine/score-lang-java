@@ -11,15 +11,17 @@ public class ScoreIntArray extends ScoreValueArray<ScoreInt> {
     
     public ScoreIntArray(int initialSize) {
         super(initialSize);
+        for (int i = 0; i < initialSize; i++)
+        	push(new ScoreInt(0));
     }
     
-    public ScoreIntArray(ScoreInt... values) {
-        this(10);
+    public ScoreIntArray(ScoreInt[] values) {
+        this();
         set(values);
     }
     
-    public ScoreIntArray(long... values) {
-        this(10);
+    public ScoreIntArray(long[] values) {
+        this();
         set(values);
     }
 	
@@ -33,7 +35,10 @@ public class ScoreIntArray extends ScoreValueArray<ScoreInt> {
 	}
 	
 	public long[] getLongs() {
-	    long[] res = new long[size()];
+		ScoreInt[] v = get();
+	    long[] res = new long[v.length];
+	    for (int i = 0; i < v.length; i++)
+	    	res[i] = v[i].get();
 	    return res;
 	}
 	

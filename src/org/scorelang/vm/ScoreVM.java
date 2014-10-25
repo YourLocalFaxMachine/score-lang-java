@@ -8,6 +8,8 @@ import org.scorelang.ScoreException;
 import org.scorelang.function.ScoreFunction;
 import org.scorelang.object.ScoreObject;
 import org.scorelang.util.ScoreVector;
+import org.scorelang.value.*;
+import org.scorelang.value.array.*;
 
 public class ScoreVM {
 	
@@ -236,6 +238,76 @@ public class ScoreVM {
 					push(absop(val));
 					break;
 				}
+				case MKARRAY: {
+					ScoreObject[] vals = pop(arg1);
+					ScoreObject t = _ci._values.get(arg0);
+					ScoreObject s = pop();
+					// check that the size is an integer
+					if (!s.isInt())
+						throw new ScoreException("Array sizes can only be integers.");
+					int size = (int) s.getInt();
+					if (size == -1)
+						size = arg1;
+					else if (size != arg1 && arg1 != -1)
+						throw new ScoreException("Defined array size and default array length do not match.");
+					String type = t.getString(); // must be string
+					ScoreObject arr;
+					switch (type) {
+						case "bool":
+							if (arg1 == -1) { // NO defaults
+								arr = new ScoreObject(new ScoreBoolArray(size));
+							} else {
+								ScoreBool[] v = new ScoreBool[vals.length];
+								for (int j = 0; j < vals.length; j++)
+									v[j] = new ScoreBool(vals[vals.length - j - 1].getAsBool());
+								arr = new ScoreObject(new ScoreBoolArray(v));
+							}
+							break;
+						case "char":
+							if (arg1 == -1) { // NO defaults
+								arr = new ScoreObject(new ScoreCharArray(size));
+							} else {
+								ScoreChar[] v = new ScoreChar[vals.length];
+								for (int j = 0; j < vals.length; j++)
+									v[j] = new ScoreChar(vals[vals.length - j - 1].getAsChar());
+								arr = new ScoreObject(new ScoreCharArray(v));
+							}
+							break;
+						case "float":
+							if (arg1 == -1) { // NO defaults
+								arr = new ScoreObject(new ScoreFloatArray(size));
+							} else {
+								ScoreFloat[] v = new ScoreFloat[vals.length];
+								for (int j = 0; j < vals.length; j++)
+									v[j] = new ScoreFloat(vals[vals.length - j - 1].getAsFloat());
+								arr = new ScoreObject(new ScoreFloatArray(v));
+							}
+							break;
+						case "int":
+							if (arg1 == -1) { // NO defaults
+								arr = new ScoreObject(new ScoreIntArray(size));
+							} else {
+								ScoreInt[] v = new ScoreInt[vals.length];
+								for (int j = 0; j < vals.length; j++)
+									v[j] = new ScoreInt(vals[vals.length - j - 1].getAsInt());
+								arr = new ScoreObject(new ScoreIntArray(v));
+							}
+							break;
+						case "string":
+							if (arg1 == -1) { // NO defaults
+								arr = new ScoreObject(new ScoreStringArray(size));
+							} else {
+								ScoreString[] v = new ScoreString[vals.length];
+								for (int j = 0; j < vals.length; j++)
+									v[j] = new ScoreString(vals[vals.length - j - 1].getAsString());
+								arr = new ScoreObject(new ScoreStringArray(v));
+							}
+							break;
+						default: throw new ScoreException("Cannot create an array of type " + type + ".");
+					}
+					push(arr);
+					break;
+				}
 				case PRINT:
 				case PRINTLN:
 					System.out.print(toPrintString(arg0, op == PRINTLN));
@@ -302,9 +374,15 @@ public class ScoreVM {
 			case CHAR:
 			case FLOAT:
 			case INT:
-			case INT_ARRAY:
-			case STRING:
 			case ROUT:
+			case STRING:
+			case VAR_ARRAY:
+			case BOOL_ARRAY:
+			case CHAR_ARRAY:
+			case FLOAT_ARRAY:
+			case INT_ARRAY:
+			case ROUT_ARRAY:
+			case STRING_ARRAY:
 				return obj.valueString();
 		}
 		return "null";
@@ -469,9 +547,14 @@ public class ScoreVM {
 		return _stack.pop();
 	}
 	
-	public void pop(int n) {
+	// The array is in reverse order from the top-down
+	public ScoreObject[] pop(int n) {
+		if (n < 1)
+			return new ScoreObject[0];
+		ScoreObject[] res = new ScoreObject[n];
 		for (int i = 0; i < n; i++)
-			pop();
+			res[i] = pop();
+		return res;
 	}
 	
 	public ScoreObject get(int idx) {

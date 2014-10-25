@@ -11,6 +11,7 @@ public class ScoreString implements ScoreValue {
 	private ScoreVector<ScoreChar> _value;
 	
 	public ScoreString() {
+		this(new ScoreVector<ScoreChar>());
 	}
 	
 	public ScoreString(ScoreVector<ScoreChar> value) {

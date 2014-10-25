@@ -300,21 +300,29 @@ public class ScoreCompiler {
 					// For now push null, We'll do things soon
 					switch (_typeString) {
 						case "bool":
-							_func.addInst(PUSH, _func.getBoolValue(false));
+						if (_array)
+								_func.addInst(PUSH, _func.getValue(new ScoreBoolArray()));
+							else 	_func.addInst(PUSH, _func.getBoolValue(false));
 							break;
 						case "char":
-							_func.addInst(PUSH, _func.getCharValue('\u0000'));
+							if (_array)
+								_func.addInst(PUSH, _func.getValue(new ScoreCharArray()));
+							else _func.addInst(PUSH, _func.getCharValue('\u0000'));
 							break;
 						case "float":
-							_func.addInst(PUSH, _func.getNumericValue(0.0));
+							if (_array)
+								_func.addInst(PUSH, _func.getValue(new ScoreFloatArray()));
+							else _func.addInst(PUSH, _func.getNumericValue(0.0));
 							break;
 						case "int":
 							if (_array)
-								_func.addInst(PUSH, _func.getValue(new ScoreIntArray(1, 2, 3)));
+								_func.addInst(PUSH, _func.getValue(new ScoreIntArray()));
 							else _func.addInst(PUSH, _func.getNumericValue(0));
 							break;
 						case "string":
-							_func.addInst(PUSH, _func.getStringValue(""));
+							if (_array)
+								_func.addInst(PUSH, _func.getValue(new ScoreStringArray()));
+							else _func.addInst(PUSH, _func.getStringValue(""));
 							break;
 						default: _func.addInst(PUSHNULL);
 					}
@@ -432,28 +440,46 @@ public class ScoreCompiler {
 				lex();
 				break;
 			case TK_IDENT: {
-				String varName = _string;
-				_es._type = IDENT;
-				_func.addInst(PUSH, _func.getStringValue(varName));
-				_func.addInst(GET);
-				lex();
-				switch (_token) {
-					case TK_PLUSPLUS:
+				String ident = _string; lex();
+				if (_token == TK_OPENBRACKET) {
+					_es._type = EXPR;
+					lex();
+					if (_token != TK_CLOSEBRACKET)
+						load(); // the size
+					else _func.addInst(PUSH, _func.getNumericValue(-1));
+					expect(TK_CLOSEBRACKET);
+					// now check for initializer
+					int numArrayVals = -1;
+					if (_token == TK_OPENBRACE) {
 						lex();
-						_func.addInst(PUSH, _func.getStringValue(varName));
-						_func.addInst(INC, _func.getNumericValue(1));
-						break;
-					case TK_MINUSMINUS:
-						lex();
-						_func.addInst(PUSH, _func.getStringValue(varName));
-						_func.addInst(INC, _func.getNumericValue(-1));
-						break;
-					case TK_NOTNOT:
-						lex();
-						_func.addInst(PUSH, _func.getStringValue(varName));
-						_func.addInst(BOOLNOTNOT);
-						break;
-					// default means nothing's there so we good ^_^
+						if (_token != TK_CLOSEBRACE)
+							numArrayVals = commaExpr();
+						expect(TK_CLOSEBRACE);
+					}
+					_func.addInst(MKARRAY, _func.getStringValue(ident), numArrayVals);
+					expect(TK_SEMICOLON); // because at this point the checkSemi method won't do it for us because of the }.
+				} else {
+					_es._type = IDENT;
+					_func.addInst(PUSH, _func.getStringValue(ident));
+					_func.addInst(GET);
+					switch (_token) {
+						case TK_PLUSPLUS:
+							lex();
+							_func.addInst(PUSH, _func.getStringValue(ident));
+							_func.addInst(INC, _func.getNumericValue(1));
+							break;
+						case TK_MINUSMINUS:
+							lex();
+							_func.addInst(PUSH, _func.getStringValue(ident));
+							_func.addInst(INC, _func.getNumericValue(-1));
+							break;
+						case TK_NOTNOT:
+							lex();
+							_func.addInst(PUSH, _func.getStringValue(ident));
+							_func.addInst(BOOLNOTNOT);
+							break;
+						// default means nothing's there so we good ^_^
+					}
 				}
 				break;
 			}

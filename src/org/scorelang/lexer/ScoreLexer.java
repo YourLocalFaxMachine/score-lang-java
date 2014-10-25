@@ -209,12 +209,27 @@ public class ScoreLexer {
 	
 	// Lex Literals
 	
+	private char escape(char v) {
+		switch (v) {
+			case '\\': return '\\';
+			case 'b':  return '\b';
+			case 't':  return '\t';
+			case 'n':  return '\n';
+			case 'f':  return '\f';
+			case 'r':  return '\r';
+			case '0':  return '\0';
+			case '"':  return '"';
+			case '\'': return '\'';
+			default: throw new ScoreException("Unrecognized excape char '\\" + _val + "'");
+		}
+	}
+	
 	private int readChar() {
 		read();
 		prepareString();
 		if (_val == '\\') {
-			_sb.append('\\');
 			read();
+			_sb.append(escape(_val));
 		}
 		_sb.append(_val);
 		read();
@@ -271,18 +286,7 @@ public class ScoreLexer {
 					break;
 				case '\\':
 					read();
-					switch (_val) {
-						case '\\': _sb.append('\\'); break;
-						case 'b':  _sb.append('\b'); break;
-						case 't':  _sb.append('\t'); break;
-						case 'n':  _sb.append('\n'); break;
-						case 'f':  _sb.append('\f'); break;
-						case 'r':  _sb.append('\r'); break;
-						case '0':  _sb.append('\0'); break;
-						case '"':  _sb.append('"');  break;
-						case '\'': _sb.append('\''); break;
-						default: throw new ScoreException("Unrecognized excape char '\\" + _val + "'");
-					}
+					_sb.append(escape(_val));
 					break;
 				default:
 					_sb.append(_val);
