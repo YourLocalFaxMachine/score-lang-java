@@ -332,6 +332,7 @@ public class ScoreLexer {
 			case KW_WHILE:		return TK_WHILE;
 			case KW_BREAK:		return TK_BREAK;		/// TODO Breaks and Continues
 			case KW_CONTINUE:	return TK_CONTINUE;
+			case KW_NEW:		return TK_NEW;
 			case KW_PRINT:		return TK_PRINT;
 			case KW_PRINTLN:	return TK_PRINTLN;
 			case KW_ERROR:		return TK_ERROR;

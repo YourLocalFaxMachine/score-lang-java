@@ -439,8 +439,9 @@ public class ScoreCompiler {
 				_es._type = EXPR;
 				lex();
 				break;
-			case TK_IDENT: {
-				String ident = _string; lex();
+			case TK_NEW: {
+				lex();
+				ScoreObject newWhat = expect(TK_IDENT);
 				if (_token == TK_OPENBRACKET) {
 					_es._type = EXPR;
 					lex();
@@ -456,30 +457,33 @@ public class ScoreCompiler {
 							numArrayVals = commaExpr();
 						expect(TK_CLOSEBRACE);
 					}
-					_func.addInst(MKARRAY, _func.getStringValue(ident), numArrayVals);
+					_func.addInst(MKARRAY, _func.getValue(newWhat), numArrayVals);
 					expect(TK_SEMICOLON); // because at this point the checkSemi method won't do it for us because of the }.
-				} else {
-					_es._type = IDENT;
-					_func.addInst(PUSH, _func.getStringValue(ident));
-					_func.addInst(GET);
-					switch (_token) {
-						case TK_PLUSPLUS:
-							lex();
-							_func.addInst(PUSH, _func.getStringValue(ident));
-							_func.addInst(INC, _func.getNumericValue(1));
-							break;
-						case TK_MINUSMINUS:
-							lex();
-							_func.addInst(PUSH, _func.getStringValue(ident));
-							_func.addInst(INC, _func.getNumericValue(-1));
-							break;
-						case TK_NOTNOT:
-							lex();
-							_func.addInst(PUSH, _func.getStringValue(ident));
-							_func.addInst(BOOLNOTNOT);
-							break;
-						// default means nothing's there so we good ^_^
-					}
+				} // else if open paren
+				break;
+			}
+			case TK_IDENT: {
+				String ident = _string; lex();
+				_es._type = IDENT;
+				_func.addInst(PUSH, _func.getStringValue(ident));
+				_func.addInst(GET);
+				switch (_token) {
+					case TK_PLUSPLUS:
+						lex();
+						_func.addInst(PUSH, _func.getStringValue(ident));
+						_func.addInst(INC, _func.getNumericValue(1));
+						break;
+					case TK_MINUSMINUS:
+						lex();
+						_func.addInst(PUSH, _func.getStringValue(ident));
+						_func.addInst(INC, _func.getNumericValue(-1));
+						break;
+					case TK_NOTNOT:
+						lex();
+						_func.addInst(PUSH, _func.getStringValue(ident));
+						_func.addInst(BOOLNOTNOT);
+						break;
+					// default means nothing's there so we good ^_^
 				}
 				break;
 			}

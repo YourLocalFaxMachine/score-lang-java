@@ -11,6 +11,7 @@ public class ScoreKeywords {
 	public static final String KW_WHILE		= "while";
 	public static final String KW_BREAK		= "break";
 	public static final String KW_CONTINUE	= "continue";
+	public static final String KW_NEW		= "new";
 	public static final String KW_PRINT		= "print";
 	public static final String KW_PRINTLN	= "println";
 	public static final String KW_ERROR		= "error";

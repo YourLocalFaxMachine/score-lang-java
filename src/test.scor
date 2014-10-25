@@ -1,17 +1,17 @@
 bool toggle;
-bool[] arrb = bool[] { true, toggle, false };
+bool[] arrb = new bool[] { true, toggle, false };
 
 char c = 'c';
-char[] arrc = char[] { 'a', 'b', c, 'z', '\'' };
+char[] arrc = new char[] { 'a', 'b', c, 'z', '\'' };
 
 float pi = 3.14159265358979;
-float[] arrf = float[] { 1.0f, 3, pi, (5 + 6.3), 92f };
+float[] arrf = new float[] { 1.0f, 3, pi, (5 + 6.3), 92f };
 
 int minusTen = -10;
-int[] arri = int[] { 1, <int> pi, 2, 6, 5, 9, |minusTen| };
+int[] arri = new int[] { 1, <int> pi, 2, 6, 5, 9, |minusTen| };
 
 string hello = "Hello";
-string[] arrs = string[] { hello, "world!" };
+string[] arrs = new string[] { hello, "world!" };
 
 println typeof arrb, "arrb =", arrb;
 println typeof arrc, "arrc =", arrc;

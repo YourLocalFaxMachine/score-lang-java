@@ -60,5 +60,6 @@ public class ScoreToken {
 	public static final int TK_CLOSEBRACKET		= 0x38;
 	public static final int TK_BREAK			= 0x39;
 	public static final int TK_CONTINUE			= 0x3A;
+	public static final int TK_NEW				= 0x3B;
 	
 }
