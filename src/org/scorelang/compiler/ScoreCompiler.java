@@ -8,6 +8,7 @@ import org.scorelang.function.*;
 import org.scorelang.lexer.ScoreLexer;
 import org.scorelang.object.ScoreObject;
 import org.scorelang.util.ScoreVector;
+import org.scorelang.value.array.*;
 import org.scorelang.vm.ScoreInstruction;
 
 import java.io.InputStream;
@@ -38,10 +39,6 @@ public class ScoreCompiler {
 		
 	}
 	
-	// Things
-	
-	private boolean _semiOptional = true;
-	
 	// VARS
 	
 	private ScoreLexer _lexer;
@@ -56,7 +53,7 @@ public class ScoreCompiler {
 	// Definitions
 	
 	private boolean _defining = false;
-	private boolean _local = false, _static = false, _final = false;
+	private boolean _array = false, _local = false, _static = false, _final = false;
 	private String _typeString = "";
 	
 	//
@@ -103,14 +100,9 @@ public class ScoreCompiler {
 	// Token Stuff
 	
 	private void checkSemi() {
-		if (_semiOptional) {
-			if (_token == TK_SEMICOLON)
-				lex();
-		} else {
-			if (_token != TK_SEMICOLON)
-				throw new CompilerException("Expected ';'.");
-			lex();
-		}
+		if (_token != TK_SEMICOLON)
+			throw new CompilerException("Expected ';'.");
+		lex();
 	}
 	
 	private ScoreObject expect(int token) {
@@ -152,8 +144,14 @@ public class ScoreCompiler {
 		_typeString = type;
 	}
 	
+	private void defArray() {
+		_defining = true;
+		_array = true;
+	}
+	
 	private void defEnd() {
 		_defining = false;
+		_array = false;
 		_local = false;
 		_static = false;
 		_final = false;
@@ -223,11 +221,15 @@ public class ScoreCompiler {
 	// For unmodified declarations
 	private void statementDecl() {
 		next(); // To check for all of the types
-		if (_token == TK_IDENT && _nexttoken == TK_IDENT) {
+		if (_token == TK_IDENT && (_nexttoken == TK_IDENT || _nexttoken == TK_OPENBRACKET)) {
 			// _func.addInst(PUSH, _func.getStringValue(_string));
 			// defStart();
 			defTypeString(_string);
 			lex();
+			if (_token == TK_OPENBRACKET) {
+				lex(); expect(TK_CLOSEBRACKET);
+				defArray();
+			}
 		}
 		expression();
 	}
@@ -256,9 +258,19 @@ public class ScoreCompiler {
 		ExpState es = new ExpState(_es);
 		_es._type = EXPR;
 		
+		boolean doDefine = _defining;
+		_defining = false;
+		
 		factor();
 		if (_defining && _es._type == EXPR)
 			throw new CompilerException("Cannot use an expression as a variable name.");
+		
+		if (_token == TK_OPENBRACKET) {
+			if (_array)
+				throw new CompilerException("Already defining as an array. Use \"type[] name\" or \"type name[]\", but not both.");
+			lex(); expect(TK_CLOSEBRACKET);
+			defArray();
+		}
 		
 		switch (_token) {
 			case TK_EQUALS: {
@@ -270,33 +282,45 @@ public class ScoreCompiler {
 				
 				// Both require three things on the stack:
 				// The type, name and value
-				if (_defining) {
+				if (doDefine) {
 					// Assign outer
 					if (_local)
-						_func.addInst(ASSIGNL, _static ? 1 : 0, _final ? 1 : 0);
-					else _func.addInst(ASSIGN, _static ? 1 : 0, _final ? 1 : 0);
+						_func.addInst(ASSIGNL, _array ? 1 : 0, _static ? 1 : 0, _final ? 1 : 0);
+					else _func.addInst(ASSIGN, _array ? 1 : 0, _static ? 1 : 0, _final ? 1 : 0);
 					defEnd();
 				} else {
 					_func.addInst(SET);
 				}
 				break;
 			}
-			default: {
-				if (_defining) {
+			case TK_SEMICOLON: {
+				if (doDefine) {
 					// DEFAULT!
 					_func.popInst(); // Pop the get inst thingy (get)
 					// For now push null, We'll do things soon
 					switch (_typeString) {
-						case "bool": _func.addInst(PUSH, _func.getBoolValue(false)); break;
-						case "char": _func.addInst(PUSH, _func.getCharValue('\u0000')); break;
-						case "float": _func.addInst(PUSH, _func.getNumericValue(0.0)); break;
-						case "int": _func.addInst(PUSH, _func.getNumericValue(0)); break;
-						case "string": _func.addInst(PUSH, _func.getStringValue("")); break;
+						case "bool":
+							_func.addInst(PUSH, _func.getBoolValue(false));
+							break;
+						case "char":
+							_func.addInst(PUSH, _func.getCharValue('\u0000'));
+							break;
+						case "float":
+							_func.addInst(PUSH, _func.getNumericValue(0.0));
+							break;
+						case "int":
+							if (_array)
+								_func.addInst(PUSH, _func.getValue(new ScoreIntArray(1, 2, 3)));
+							else _func.addInst(PUSH, _func.getNumericValue(0));
+							break;
+						case "string":
+							_func.addInst(PUSH, _func.getStringValue(""));
+							break;
 						default: _func.addInst(PUSHNULL);
 					}
 					if (_local)
-						_func.addInst(ASSIGNL, _static ? 1 : 0, _final ? 1 : 0);
-					else _func.addInst(ASSIGN, _static ? 1 : 0, _final ? 1 : 0);
+						_func.addInst(ASSIGNL, _array ? 1 : 0, _static ? 1 : 0, _final ? 1 : 0);
+					else _func.addInst(ASSIGN, _array ? 1 : 0, _static ? 1 : 0, _final ? 1 : 0);
 					defEnd();
 				}
 				break;
@@ -313,10 +337,23 @@ public class ScoreCompiler {
 				_func.addInst(UNM);
 				_es._type = EXPR;
 				break;
+			// Brackets and Parens function the same here :D
 			case TK_OPENPAREN:
 				lex(); expression();
 				expect(TK_CLOSEPAREN);
 				_es._type = EXPR;
+				break;
+			case TK_OPENBRACKET:
+				lex(); expression();
+				expect(TK_CLOSEBRACKET);
+				_es._type = EXPR;
+				break;
+			// Pipes function the same as parens and brackets, but add an ABS instruction afterwards :D
+			case TK_PIPE:
+				lex(); expression();
+				expect(TK_PIPE);
+				_es._type = EXPR;
+				_func.addInst(ABS);
 				break;
 			case TK_LESS:
 				lex();

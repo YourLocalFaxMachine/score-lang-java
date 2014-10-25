@@ -4,10 +4,12 @@ import org.scorelang.function.ScoreFunction;
 import org.scorelang.ScoreException;
 import org.scorelang.util.ScoreVector;
 import org.scorelang.value.*;
+import org.scorelang.value.array.*;
 
 public class ScoreObject {
 	
 	public static final byte NULL			= 0x00;
+	
 	public static final byte BOOL			= 0x01;
 	public static final byte CHAR			= 0x02;
 	public static final byte FLOAT			= 0x03;
@@ -15,8 +17,16 @@ public class ScoreObject {
 	public static final byte ROUT			= 0x05;
 	public static final byte STRING			= 0x06;
 	
+	public static final byte VAR_ARRAY		= 0x07; // But no var, because var means ANYTHING but var arrays CONTAIN everything (so need an object for them).
+	public static final byte BOOL_ARRAY		= 0x08;
+	public static final byte CHAR_ARRAY		= 0x09;
+	public static final byte FLOAT_ARRAY	= 0x0A;
+	public static final byte INT_ARRAY		= 0x0B;
+	public static final byte ROUT_ARRAY		= 0x0C;
+	public static final byte STRING_ARRAY	= 0x0D;
+	
 	// Native compatability
-	public static boolean isTypeCompatable(ScoreObject val, String typeString) {
+	public static boolean isTypeCompatable(ScoreObject val, String typeString, boolean isArray) {
 		switch (typeString) {
 			case "var": return true;
 			case "bool":
@@ -26,6 +36,8 @@ public class ScoreObject {
 			case "float":
 				return val.isFloat() || val.isChar() || val.isInt();
 			case "int":
+				if (isArray)
+					return val.isIntArray();
 				return val.isChar() || val.isInt();
 			case "string":
 				return val.isString();
@@ -34,24 +46,40 @@ public class ScoreObject {
 	}
 	
 	// Native compatability
-	public static ScoreObject nativeCastType(ScoreObject val, String typeString) {
+	public static ScoreObject nativeCastType(ScoreObject val, String typeString, boolean isArray) {
 		switch (typeString) {
 			case "var": return val;
-			case "bool": return new ScoreObject(val.getBool());
-			case "char": return new ScoreObject(val.getChar());
+			case "bool":
+				if (val.getType() == BOOL)
+					return val;
+				break;
+			case "char":
+				if (val.getType() == CHAR)
+					return val;
+				break;
 			case "float":
 				if (val.getType() == FLOAT)
-					return new ScoreObject(val.getFloat());
+					return val;
 				else if (val.getType() == INT)
 					return new ScoreObject((double) val.getInt());
 				else if (val.getType() == CHAR)
 					return new ScoreObject((double) val.getChar());
+				break;
 			case "int":
-				if (val.getType() == INT)
-					return new ScoreObject(val.getInt());
-				else if (val.getType() == CHAR)
-					return new ScoreObject((long) val.getChar());
-			case "string": return new ScoreObject(val.getString());
+				if (isArray) {
+					if (val.getType() == INT_ARRAY)
+						return val;
+				} else {
+					if (val.getType() == INT)
+						return val;
+					else if (val.getType() == CHAR)
+						return new ScoreObject((long) val.getChar());
+				}
+				break;
+			case "string":
+				if (val.getType() == STRING)
+					return val;
+				break;
 		}
 		throw new ScoreException("Can't natively cast that value to that type.");
 	}
@@ -65,6 +93,11 @@ public class ScoreObject {
 	
 	public ScoreObject() {
 		this(NULL, false);
+	}
+	
+	public ScoreObject(ScoreValue val) {
+		this(val.getType(), val instanceof ScoreValueArray);
+		_value = val;
 	}
 	
 	public ScoreObject(byte type, boolean isArray) {
@@ -87,6 +120,14 @@ public class ScoreObject {
 		setInt(value);
 	}
 	
+	public ScoreObject(ScoreInt[] value) {
+		setIntArray(value);
+	}
+	
+	public ScoreObject(long[] value) {
+		setIntArray(value);
+	}
+	
 	public ScoreObject(ScoreFunction value) {
 		setRout(value);
 	}
@@ -104,13 +145,14 @@ public class ScoreObject {
 	
 	public String getTypeName() {
 		switch (_type) {
-			case NULL:		return "null";
-			case BOOL:		return "bool";
-			case CHAR:		return "char";
-			case FLOAT:		return "float";
-			case INT:		return "int";
-			case ROUT:		return "rout";
-			case STRING:	return "string";
+			case NULL:			return "null";
+			case BOOL:			return "bool";
+			case CHAR:			return "char";
+			case FLOAT:			return "float";
+			case INT:			return "int";
+			case ROUT:			return "rout";
+			case STRING:		return "string";
+			case INT_ARRAY:		return "int[]";
 		}
 		throw new ScoreException("Type not recognized.");
 	}
@@ -245,6 +287,50 @@ public class ScoreObject {
 		else setValue(new ScoreInt(value));
 	}
 	
+	// Int
+	
+	public boolean isIntArray() {
+		return _type == INT_ARRAY;
+	}
+	
+	private ScoreIntArray getIntArrayValue() {
+		if (_type != INT_ARRAY)
+			throw new ScoreException("Object is not an int[].");
+		return (ScoreIntArray) _value;
+	}
+	
+	public ScoreInt[] getIntArray() {
+		return getIntArrayValue().get();
+	}
+	
+	public long[] getIntArrayLongs() {
+		return getIntArrayValue().getLongs();
+	}
+	
+	public ScoreInt[] getAsIntArray() {
+		if (isIntArray())
+			return getIntArray();
+		throw new ScoreException("Cannot convert type " + getTypeName() + " to an int[].");
+	}
+	
+	public long[] getAsIntArrayLongs() {
+		if (isIntArray())
+			return getIntArrayLongs();
+		throw new ScoreException("Cannot convert type " + getTypeName() + " to an int[].");
+	}
+	
+	public void setIntArray(ScoreInt[] values) {
+		if (_type == INT_ARRAY)
+			getIntArrayValue().set(values);
+		else setValue(new ScoreIntArray(values));
+	}
+	
+	public void setIntArray(long[] values) {
+		if (_type == INT_ARRAY)
+			getIntArrayValue().set(values);
+		else setValue(new ScoreIntArray(values));
+	}
+	
 	// Rout
 	
 	public boolean isRout() {
@@ -314,16 +400,16 @@ public class ScoreObject {
 	// Value
 	
 	public boolean isNull() {
-		return _value == null;
+		return _value == null || _type == NULL;
 	}
 	
 	public void setValue(ScoreValue value) {
-		setType(value.getType(), false);
+		setType(value.getType(), value instanceof ScoreValueArray);
 		_value = value;
 	}
 	
 	public void setToNull() {
-		setType((byte) 0, false);
+		setType(NULL, false);
 		_value = null;
 	}
 	

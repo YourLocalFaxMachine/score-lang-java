@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 public class ScoreVector<T> {
 	
+	private final int _initCapacity;
+	
 	private Object[] _data;
 	private int _size;
 	private int _capacity;
@@ -13,16 +15,26 @@ public class ScoreVector<T> {
 	}
 	
 	public ScoreVector(int initCapacity) {
-		_data = new Object[initCapacity];
-		_capacity = initCapacity;
+		if (initCapacity < 1)
+			initCapacity = 1;
+		_initCapacity = initCapacity;
+		clear();
 	}
 	
 	// Resize the thing
 	
 	private void resize(int newcap) {
+		if (newcap < 4)
+			newcap = 4;
 		_data = Arrays.copyOf(_data, newcap);
 		_capacity = newcap;
 		_size = Math.min(newcap, _size);
+	}
+	
+	public void clear() {
+		_data = new Object[_initCapacity];
+		_capacity = _initCapacity;
+		_size = 0;
 	}
 	
 	// Push

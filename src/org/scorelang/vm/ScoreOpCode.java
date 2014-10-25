@@ -27,7 +27,6 @@ public class ScoreOpCode {
 	public static final byte NOTTYPEOF	= 0x1C;
 	public static final byte MOD		= 0x1D;
 	public static final byte POW		= 0x1E;
-	public static final byte BOOLNOT	= 0x1F;
 	
 	public static final byte BOOLOR		= 0x20;
 	public static final byte BOOLAND	= 0x21;
@@ -46,6 +45,8 @@ public class ScoreOpCode {
 	public static final byte JMPF		= 0x43;
 	public static final byte JMPT		= 0x44;
 	public static final byte INC		= 0x45;
-	public static final byte BOOLNOTNOT	= 0x46;
+	public static final byte BOOLNOT	= 0x46;
+	public static final byte BOOLNOTNOT	= 0x47;
+	public static final byte ABS		= 0x48;
 	
 }

@@ -52,5 +52,13 @@ public class ScoreToken {
 	public static final int TK_NOTNOT			= 0x30;
 	public static final int TK_WHILE			= 0x31;
 	public static final int TK_SLEEP			= 0x32;
+	public static final int TK_AND				= 0x33;
+	public static final int TK_PIPE				= 0x34;
+	public static final int TK_ANDEQ			= 0x35;
+	public static final int TK_OREQ				= 0x36;
+	public static final int TK_OPENBRACKET		= 0x37;
+	public static final int TK_CLOSEBRACKET		= 0x38;
+	public static final int TK_BREAK			= 0x39;
+	public static final int TK_CONTINUE			= 0x3A;
 	
 }

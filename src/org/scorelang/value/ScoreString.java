@@ -33,7 +33,6 @@ public class ScoreString implements ScoreValue {
 	}
 	
 	public String getString() {
-		// TODO Optimize
 		if (_updateString) {
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < _value.size(); i++)

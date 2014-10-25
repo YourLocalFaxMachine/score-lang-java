@@ -79,6 +79,7 @@ public class ScoreVM {
 			byte op = in.getOp();
 			int arg0 = in.getArg0();
 			int arg1 = in.getArg1();
+			int arg2 = in.getArg2();
 			
 			switch (op) {
 				// TODO: Scopes are not perfect yet, they just kinda work. I have to restructure this for functions and such
@@ -133,11 +134,12 @@ public class ScoreVM {
 					ScoreObject val = pop();
 					ScoreObject name = pop();
 					ScoreObject type = pop();
+					// TODO arrays don't exist yet, so this sets everything to NOT AN ARRAY: FIX SOON
 					if (op == ASSIGN && _scope == null) {
-						_root.assign(name.getString(), val, type.getString(), arg0 == 1 ? true : false, arg1 == 1 ? true : false);
+						_root.assign(name.getString(), val, type.getString(), arg0 == 1 ? true : false, arg1 == 1 ? true : false, arg2 == 1 ? true : false);
 						// System.out.println("ASSIGN type " + type + " - name "  + name + " - val " + val);
 					} else {
-						_scope._locals.assign(name.getString(), val, type.getString(), arg0 == 1 ? true : false, arg1 == 1 ? true : false);
+						_scope._locals.assign(name.getString(), val, type.getString(), arg0 == 1 ? true : false, arg1 == 1 ? true : false, arg2 == 1 ? true : false);
 					}
 					break;
 				}
@@ -229,6 +231,11 @@ public class ScoreVM {
 					push(new ScoreObject(op == NOTTYPEOF ? !isType : isType));
 					break;
 				}
+				case ABS: {
+					ScoreObject val = pop();
+					push(absop(val));
+					break;
+				}
 				case PRINT:
 				case PRINTLN:
 					System.out.print(toPrintString(arg0, op == PRINTLN));
@@ -295,6 +302,7 @@ public class ScoreVM {
 			case CHAR:
 			case FLOAT:
 			case INT:
+			case INT_ARRAY:
 			case STRING:
 			case ROUT:
 				return obj.valueString();
@@ -401,6 +409,20 @@ public class ScoreVM {
 				return new ScoreObject(a.getInt() / b.getInt());
 		}
 		throw new ScoreException("Cannot add type " + b.getTypeName() + " to type " + a.getTypeName() + ".");
+	}
+	
+	private ScoreObject absop(ScoreObject val) {
+		if (val.isNumeric()) {
+			if (val.isFloat()) {
+				double f = val.getFloat();
+				return new ScoreObject(f <= 0.0 ? 0.0 - f : f);
+			} else if (val.isInt()) {
+				long l = val.getInt(); 
+				return new ScoreObject(l < 0 ? -l : l);
+			} else
+				throw new ScoreException("Cannot take the absolute value of that numeric value (" + val.getTypeName() + ").");
+		} else
+			throw new ScoreException("Currently can only take the absolute value of numbers.");
 	}
 	
 	private ScoreObject typecast(ScoreObject val, String type) {

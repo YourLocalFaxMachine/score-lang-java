@@ -2,6 +2,7 @@ package org.scorelang.function;
 
 import org.scorelang.object.ScoreObject;
 import org.scorelang.util.ScoreVector;
+import org.scorelang.value.ScoreValue;
 import org.scorelang.vm.ScoreInstruction;
 
 public class ScoreFunctionState {
@@ -34,9 +35,13 @@ public class ScoreFunctionState {
 	
 	// Values
 	
-	public int getValue(ScoreObject val) {
-		_values.push(val);
+	public int getValue(ScoreObject obj) {
+		_values.push(obj);
 		return _values.size() - 1;
+	}
+	
+	public int getValue(ScoreValue val) {
+		return getValue(new ScoreObject(val));
 	}
 	
 	public int getBoolValue(boolean val) {
