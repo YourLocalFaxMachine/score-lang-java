@@ -167,6 +167,16 @@ public class ScoreVM {
 					// push the value back to the stack for chained things.
 					break;
 				}
+				case SETINDEX: {
+					break;
+				}
+				case SUBARRAY: {
+					ScoreObject end = pop();
+					ScoreObject start = pop();
+					ScoreObject val = pop();
+					push(subarray(val, start, end));
+					break;
+				}
 				case CAST: {
 					ScoreObject val = pop();
 					ScoreObject type = pop();
@@ -563,6 +573,12 @@ public class ScoreVM {
 		if (val.isArray())
 			((ScoreValueArray) val.getValue()).setLength((int) len.getInt());
 		else throw new ScoreException("Cannot set the length of '" + val.getTypeName() + "'.");
+	}
+	
+	private ScoreObject subarray(ScoreObject val, ScoreObject start, ScoreObject end) {
+		if (val.isArray())
+			return ((ScoreValueArray) val.getValue()).subArray((int) start.getInt(), (int) end.getInt());
+		else throw new ScoreException("Cannot get a sub-array of '" + val.getTypeName() + "'.");
 	}
 	
 	private String repString(String str, long amt) {

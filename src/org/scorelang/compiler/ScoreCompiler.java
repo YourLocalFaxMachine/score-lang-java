@@ -517,8 +517,15 @@ public class ScoreCompiler {
 				_func.addInst(GET);
 				switch (_token) {
 					case TK_OPENBRACKET:
-						lex(); expression(); expect(TK_CLOSEBRACKET);
-						_func.addInst(GETINDEX);
+						lex(); expression();
+						if (_token == TK_COMMA) {
+							lex(); expression();
+							expect(TK_CLOSEBRACKET);
+							_func.addInst(SUBARRAY);
+						} else {
+							expect(TK_CLOSEBRACKET);
+							_func.addInst(GETINDEX);
+						}
 						break;
 					case TK_PLUSPLUS:
 						lex();

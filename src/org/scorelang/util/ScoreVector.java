@@ -84,6 +84,15 @@ public class ScoreVector<T> {
 		_data[idx] = value;
 	}
 	
+	// Special
+	
+	public ScoreVector<T> sub(int start, int end) {
+		ScoreVector<T> res = new ScoreVector<T>();
+		for (int i = start; i < end; i++)
+			res.push(get(i));
+		return res;
+	}
+	
 	// Getters
 	
 	public int size() {

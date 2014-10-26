@@ -1,6 +1,7 @@
 package org.scorelang.value.array;
 
 import org.scorelang.object.ScoreObject;
+import org.scorelang.util.ScoreVector;
 import org.scorelang.value.ScoreString;
 
 public class ScoreStringArray extends ScoreValueArray<ScoreString> {
@@ -13,6 +14,10 @@ public class ScoreStringArray extends ScoreValueArray<ScoreString> {
         super(initialSize);
         for (int i = 0; i < initialSize; i++)
         	push(new ScoreString());
+    }
+    
+    public ScoreStringArray(ScoreVector<ScoreString> values) {
+    	super(values);
     }
     
     public ScoreStringArray(ScoreString[] values) {
@@ -28,6 +33,11 @@ public class ScoreStringArray extends ScoreValueArray<ScoreString> {
     @Override
     protected ScoreObject getDefaultValue() {
     	return new ScoreObject("");
+    }
+    
+    @Override
+    public ScoreObject subArray(int start, int end) {
+    	return new ScoreObject(new ScoreStringArray(sub(start, end)));
     }
 	
 	@Override

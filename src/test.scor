@@ -1,13 +1,7 @@
 final float pi = 3.14159265358979;
 final int minusTen = -10;
 
-int[] arri = new int[] { 1, <int> pi, 2, 6, 5, 9, |minusTen| };
+int[] arri0 = new int[] { 1, <int> pi, 2, 6, 5, 9, |minusTen| };
+int[] arri1 = arri0[1, #arri0-2];
 
-println typeof arri, "arri =", arri;
-
-int oldsize = #arri;
-#arri = #arri + 2;
-
-println "arri size before was", oldsize, "and is", #arri, "now.";
-for (int i = 0; i < #arri; i++)
-    println "arri[" + i + "] =", arri[i];
+println "Original array:", arri0, "Sub array:", arri1;

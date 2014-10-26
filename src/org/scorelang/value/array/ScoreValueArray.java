@@ -16,6 +16,10 @@ public abstract class ScoreValueArray<T extends ScoreValue> implements ScoreValu
         _values = new ScoreVector<T>(initialSize);
     }
     
+    public ScoreValueArray(ScoreVector<T> values) {
+        _values = values;
+    }
+    
     protected final void clear() {
         _values.clear();
     }
@@ -26,7 +30,13 @@ public abstract class ScoreValueArray<T extends ScoreValue> implements ScoreValu
         return res;
     }
     
+    protected final ScoreVector<T> sub(int start, int end) {
+        return _values.sub(start, end);
+    }
+    
     protected abstract ScoreObject getDefaultValue();
+    
+    public abstract ScoreObject subArray(int start, int end);
     
 	@SuppressWarnings("unchecked")
     public void setLength(int len) {

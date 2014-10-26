@@ -54,5 +54,6 @@ public class ScoreOpCode {
 	public static final byte SETINDEX	= 0x52;
 	public static final byte GETLENGTH	= 0x53;
 	public static final byte SETLENGTH	= 0x54;
+	public static final byte SUBARRAY	= 0x55;
 	
 }
