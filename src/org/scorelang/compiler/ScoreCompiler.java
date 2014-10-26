@@ -253,14 +253,17 @@ public class ScoreCompiler {
 	// For unmodified declarations
 	private void statementDecl() {
 		next(); // To check for all of the types
-		if ((_defining || _token == TK_IDENT) && (_nexttoken == TK_IDENT || _nexttoken == TK_OPENBRACKET)) {
-			// _func.addInst(PUSH, _func.getStringValue(_string));
-			// defStart();
-			defTypeString(_string);
-			lex();
-			if (_token == TK_OPENBRACKET) {
-				lex(); expect(TK_CLOSEBRACKET);
+		// if we've got modifiers, always do it...
+		// Other conditions: ident + [] or ident + ident
+		if (_token == TK_IDENT && (_defining || _nexttoken == TK_BRACKETS || _nexttoken == TK_IDENT)) {
+		// if ((_defining || _token == TK_IDENT) && (_nexttoken == TK_IDENT || _nexttoken == TK_OPENBRACKET)) {
+			String str = _string; lex();
+			if (_token == TK_BRACKETS) {
+				lex();
+				defTypeString(str);
 				defArray();
+			} else if (_token == TK_IDENT) {
+				defTypeString(str);
 			}
 		}
 		expression();
@@ -304,14 +307,23 @@ public class ScoreCompiler {
 			defArray();
 		}
 		
+		tk_switch:
 		switch (_token) {
 			case TK_EQUALS: {
 				// first do checks that actually DO assign to expressions.
-				if (_func.getLastOp() == GETLENGTH) {
-					_func.popInst();
-					lex(); factor();
-					_func.addInst(SETLENGTH);
-					break;
+				byte lop = _func.getLastOp();
+				
+				switch (lop) {
+					case GETLENGTH:
+						_func.popInst();
+						lex(); factor();
+						_func.addInst(SETLENGTH);
+						break tk_switch;
+					case GETINDEX:
+						_func.popInst();
+						lex(); factor();
+						_func.addInst(SETINDEX);
+						break tk_switch;
 				}
 				
 				if (_es._type == EXPR)
@@ -428,7 +440,7 @@ public class ScoreCompiler {
 				ScoreInstruction i0 = _func.popInst(), i1 = _func.popInst();
 				_func.addInst(i1);
 				_func.addInst(INC, _func.getNumericValue(1));
-				_func.addInst(i1); 	_func.addInst(i0);
+				_func.addInst(i1); _func.addInst(i0);
 				break;
 			}
 			case TK_MINUSMINUS: { // this will always be BEFORE the thing:
@@ -439,7 +451,7 @@ public class ScoreCompiler {
 				ScoreInstruction i0 = _func.popInst(), i1 = _func.popInst();
 				_func.addInst(i1);
 				_func.addInst(INC, _func.getNumericValue(-1));
-				_func.addInst(i1); 	_func.addInst(i0);
+				_func.addInst(i1); _func.addInst(i0);
 				break;
 			}
 			case TK_NOTNOT: { // this will always be BEFORE the thing:
@@ -450,13 +462,18 @@ public class ScoreCompiler {
 				ScoreInstruction i0 = _func.popInst(), i1 = _func.popInst();
 				_func.addInst(i1);
 				_func.addInst(BOOLNOTNOT);
-				_func.addInst(i1); 	_func.addInst(i0);
+				_func.addInst(i1); _func.addInst(i0);
 				break;
 			}
 			case TK_HASH:
 				lex(); load();
 				_es._type = EXPR;
 				_func.addInst(GETLENGTH);
+				break;
+			case TK_TILDE:
+				lex(); load();
+				_es._type = EXPR;
+				_func.addInst(REVERSE);
 				break;
 			case TK_TRUE:
 			case TK_FALSE:

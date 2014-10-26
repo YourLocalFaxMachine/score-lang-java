@@ -1,5 +1,6 @@
 package org.scorelang.value.array;
 
+import org.scorelang.ScoreException;
 import org.scorelang.object.ScoreObject;
 import org.scorelang.util.ScoreVector;
 import org.scorelang.value.ScoreValue;
@@ -34,9 +35,17 @@ public abstract class ScoreValueArray<T extends ScoreValue> implements ScoreValu
         return _values.sub(start, end);
     }
     
+    protected final ScoreVector<T> rev() {
+        return _values.rev();
+    }
+    
     protected abstract ScoreObject getDefaultValue();
     
     public abstract ScoreObject subArray(int start, int end);
+    
+    public abstract ScoreObject reverse();
+    
+    public abstract boolean isCompatible(ScoreValue val);
     
 	@SuppressWarnings("unchecked")
     public void setLength(int len) {
@@ -57,6 +66,13 @@ public abstract class ScoreValueArray<T extends ScoreValue> implements ScoreValu
     
     public T get(int idx) {
         return _values.get(idx);
+    }
+    
+	@SuppressWarnings("unchecked")
+    public void set(int idx, ScoreObject val) {
+        if (!isCompatible(val.getValue()))
+            throw new ScoreException(val.getTypeName() + " is not compatible with this array.");
+        _values.set(idx, (T) val.getValue());
     }
     
     public int size() {

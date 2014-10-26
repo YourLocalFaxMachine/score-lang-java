@@ -1,7 +1,9 @@
-final float pi = 3.14159265358979;
-final int minusTen = -10;
+int[] arr = new int[10];
 
-int[] arri0 = new int[] { 1, <int> pi, 2, 6, 5, 9, |minusTen| };
-int[] arri1 = arri0[1, #arri0-2];
+print arr, "turns into ";
 
-println "Original array:", arri0, "Sub array:", arri1;
+for (int i = 0; i < #arr; i++)
+    arr[i] = (i + 1) * 2;
+arr = ~arr[0,#arr / 4 * 3];
+
+println arr;

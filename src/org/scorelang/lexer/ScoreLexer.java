@@ -127,6 +127,9 @@ public class ScoreLexer {
 				case '#':
 					read();
 					return TK_HASH;
+				case '~':
+					read();
+					return TK_TILDE;
 				case '+':
 					read();
 					if (_val == '=') {
@@ -181,6 +184,10 @@ public class ScoreLexer {
 					return TK_CLOSEBRACE;
 				case '[':
 					read();
+					if (_val == ']') {
+						read();
+						return TK_BRACKETS;
+					}
 					return TK_OPENBRACKET;
 				case ']':
 					read();

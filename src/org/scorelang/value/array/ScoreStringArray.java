@@ -3,6 +3,7 @@ package org.scorelang.value.array;
 import org.scorelang.object.ScoreObject;
 import org.scorelang.util.ScoreVector;
 import org.scorelang.value.ScoreString;
+import org.scorelang.value.ScoreValue;
 
 public class ScoreStringArray extends ScoreValueArray<ScoreString> {
     
@@ -36,8 +37,18 @@ public class ScoreStringArray extends ScoreValueArray<ScoreString> {
     }
     
     @Override
+    public boolean isCompatible(ScoreValue val) {
+        return val instanceof ScoreString;
+    }
+    
+    @Override
     public ScoreObject subArray(int start, int end) {
     	return new ScoreObject(new ScoreStringArray(sub(start, end)));
+    }
+    
+    @Override
+    public ScoreObject reverse() {
+        return new ScoreObject(new ScoreStringArray(rev()));
     }
 	
 	@Override

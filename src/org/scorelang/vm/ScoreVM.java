@@ -168,6 +168,11 @@ public class ScoreVM {
 					break;
 				}
 				case SETINDEX: {
+					ScoreObject obj = pop(); // the object to be set
+					ScoreObject idx = pop();
+					ScoreObject val = pop(); // the object (gotten by GET)
+					setindex(val, idx, obj);
+					push(obj);
 					break;
 				}
 				case SUBARRAY: {
@@ -196,6 +201,9 @@ public class ScoreVM {
 					push(len);
 					break;
 				}
+				case REVERSE:
+					push(reverse(pop()));
+					break;
 				case ADD:
 				case SUB:
 				case MUL:
@@ -562,6 +570,15 @@ public class ScoreVM {
 		return new ScoreObject();
 	}
 	
+	private void setindex(ScoreObject val, ScoreObject idx, ScoreObject obj) {
+		// do indexing of arrays, then check types and stuff later when I add them.
+		if (val.isArray()) {
+			if (!idx.isInt())
+				throw new ScoreException("Can only index an array with an int.");
+			((ScoreValueArray) val.getValue()).set((int) idx.getInt(), obj);
+		}
+	}
+	
 	private ScoreObject lengthof(ScoreObject val) {
 		// do indexing of arrays, then check types and stuff later when I add them.
 		if (val.isArray())
@@ -578,7 +595,13 @@ public class ScoreVM {
 	private ScoreObject subarray(ScoreObject val, ScoreObject start, ScoreObject end) {
 		if (val.isArray())
 			return ((ScoreValueArray) val.getValue()).subArray((int) start.getInt(), (int) end.getInt());
-		else throw new ScoreException("Cannot get a sub-array of '" + val.getTypeName() + "'.");
+		throw new ScoreException("Cannot get a sub-array of '" + val.getTypeName() + "'.");
+	}
+	
+	private ScoreObject reverse(ScoreObject val) {
+		if (val.isArray())
+			return ((ScoreValueArray) val.getValue()).reverse();
+		throw new ScoreException("Can't reverse type " + val.getTypeName() + ".");
 	}
 	
 	private String repString(String str, long amt) {

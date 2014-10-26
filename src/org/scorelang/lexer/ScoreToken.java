@@ -77,5 +77,7 @@ public class ScoreToken {
 	public static final int TK_STATIC			= 0x3E;
 	public static final int TK_FINAL			= 0x3F;
 	public static final int TK_COMMON			= 0x40;
+	public static final int TK_BRACKETS			= 0x41;
+	public static final int TK_TILDE			= 0x42;
 	
 }

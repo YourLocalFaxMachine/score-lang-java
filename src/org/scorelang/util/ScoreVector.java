@@ -87,9 +87,16 @@ public class ScoreVector<T> {
 	// Special
 	
 	public ScoreVector<T> sub(int start, int end) {
-		ScoreVector<T> res = new ScoreVector<T>();
+		ScoreVector<T> res = new ScoreVector<T>(_capacity);
 		for (int i = start; i < end; i++)
 			res.push(get(i));
+		return res;
+	}
+	
+	public ScoreVector<T> rev() {
+		ScoreVector<T> res = new ScoreVector<T>(_capacity);
+		for (int i = 0; i < _size; i++)
+			res.push(get(_size - i - 1));
 		return res;
 	}
 	

@@ -29,8 +29,18 @@ public class ScoreVarArray extends ScoreValueArray<ScoreValue> {
     }
     
     @Override
+    public boolean isCompatible(ScoreValue val) {
+        return true;
+    }
+    
+    @Override
     public ScoreObject subArray(int start, int end) {
     	return new ScoreObject(new ScoreVarArray(sub(start, end)));
+    }
+    
+    @Override
+    public ScoreObject reverse() {
+        return new ScoreObject(new ScoreVarArray(rev()));
     }
 	
 	@Override
