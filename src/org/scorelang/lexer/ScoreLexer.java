@@ -124,6 +124,9 @@ public class ScoreLexer {
 						return TK_NOTNOT;
 					}
 					return TK_BOOLNOT;
+				case '#':
+					read();
+					return TK_HASH;
 				case '+':
 					read();
 					if (_val == '=') {
@@ -322,24 +325,8 @@ public class ScoreLexer {
 			read();
 		} while (Character.isLetterOrDigit(_val) || _val == '_'); // while it's a valid identifier character, get characters it.
 		String temp = _sb.toString();
-		switch (temp) {
-			case KW_TRUE:		return TK_TRUE;
-			case KW_FALSE:		return TK_FALSE;
-			case KW_IF:			return TK_IF;
-			case KW_ELSE:		return TK_ELSE;
-			case KW_FOR:		return TK_FOR;
-			case KW_FOREACH:	return TK_FOREACH;
-			case KW_WHILE:		return TK_WHILE;
-			case KW_BREAK:		return TK_BREAK;		/// TODO Breaks and Continues
-			case KW_CONTINUE:	return TK_CONTINUE;
-			case KW_NEW:		return TK_NEW;
-			case KW_PRINT:		return TK_PRINT;
-			case KW_PRINTLN:	return TK_PRINTLN;
-			case KW_ERROR:		return TK_ERROR;
-			case KW_ERRORLN:	return TK_ERRORLN;
-			case KW_TYPEOF:		return TK_TYPEOF;
-			case KW_SLEEP:		return TK_SLEEP;
-		}
+		if (ScoreKeywords.isKeyword(temp))
+			return ScoreKeywords.getToken(temp);
 		return TK_IDENT;
 	}
 	

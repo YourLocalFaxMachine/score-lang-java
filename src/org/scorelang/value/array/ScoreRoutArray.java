@@ -20,6 +20,11 @@ public class ScoreRoutArray extends ScoreValueArray<ScoreRout> {
         set(values);
     }
     
+    @Override
+    protected ScoreObject getDefaultValue() {
+    	return new ScoreObject();
+    }
+    
 	@Override
 	public byte getType() {
 		return ScoreObject.ROUT_ARRAY;

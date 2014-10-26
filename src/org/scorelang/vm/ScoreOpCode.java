@@ -50,5 +50,9 @@ public class ScoreOpCode {
 	public static final byte ABS		= 0x48;
 	
 	public static final byte MKARRAY	= 0x50;
+	public static final byte GETINDEX	= 0x51;
+	public static final byte SETINDEX	= 0x52;
+	public static final byte GETLENGTH	= 0x53;
+	public static final byte SETLENGTH	= 0x54;
 	
 }

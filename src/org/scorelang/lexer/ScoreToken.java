@@ -2,6 +2,17 @@ package org.scorelang.lexer;
 
 public class ScoreToken {
 	
+	public static final boolean isModifier(int token) {
+		switch (token) {
+			case TK_LOCAL:
+			case TK_STATIC:
+			case TK_FINAL:
+			case TK_COMMON:
+				return true;
+			default: return false;
+		}
+	}
+	
 	public static final int TK_IDENT			= 0x00;
 	public static final int TK_PRINT			= 0x01;
 	public static final int TK_PRINTLN			= 0x02;
@@ -61,5 +72,10 @@ public class ScoreToken {
 	public static final int TK_BREAK			= 0x39;
 	public static final int TK_CONTINUE			= 0x3A;
 	public static final int TK_NEW				= 0x3B;
+	public static final int TK_HASH				= 0x3C;
+	public static final int TK_LOCAL			= 0x3D;
+	public static final int TK_STATIC			= 0x3E;
+	public static final int TK_FINAL			= 0x3F;
+	public static final int TK_COMMON			= 0x40;
 	
 }

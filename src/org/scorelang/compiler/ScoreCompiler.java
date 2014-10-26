@@ -53,7 +53,7 @@ public class ScoreCompiler {
 	// Definitions
 	
 	private boolean _defining = false;
-	private boolean _array = false, _local = false, _static = false, _final = false;
+	private boolean _array = false, _local = false, _static = false, _final = false, _common = false;
 	private String _typeString = "";
 	
 	//
@@ -131,11 +131,12 @@ public class ScoreCompiler {
 		_defining = true;
 	}
 	
-	private void defTypeMod(boolean local, boolean stat, boolean fin) {
+	private void defTypeMod(boolean local, boolean stat, boolean fin, boolean common) {
 		_defining = true;
 		_local = local;
 		_static = stat;
 		_final = fin;
+		_common = common;
 	}
 	
 	private void defTypeString(String type) {
@@ -155,6 +156,7 @@ public class ScoreCompiler {
 		_local = false;
 		_static = false;
 		_final = false;
+		_common = false;
 	}
 	
 	// Compile
@@ -215,13 +217,43 @@ public class ScoreCompiler {
 	// For modified declarations
 	private void statementDeclMod() {
 		// Check modifiers HERE
+		boolean isDef = false;
+		boolean isLocal = false, isStatic = false, isFinal = false, isCommon = false;
+		while (isModifier(_token)) {
+			isDef = true;
+			switch (_token) {
+				case TK_LOCAL:
+					if (isLocal)
+						throw new CompilerException("Cannot define as local more than once.");
+					isLocal = true;
+					break;
+				case TK_STATIC:
+					if (isStatic)
+						throw new CompilerException("Cannot define as static more than once.");
+					isStatic = true;
+					break;
+				case TK_FINAL:
+					if (isFinal)
+						throw new CompilerException("Cannot define as final more than once.");
+					isFinal = true;
+					break;
+				case TK_COMMON:
+					if (isCommon)
+						throw new CompilerException("Cannot define as common more than once.");
+					isCommon = true;
+					break;
+			}
+			lex();
+		}
+		if (isDef)
+			defTypeMod(isLocal, isStatic, isFinal, isCommon);
 		statementDecl();
 	}
 	
 	// For unmodified declarations
 	private void statementDecl() {
 		next(); // To check for all of the types
-		if (_token == TK_IDENT && (_nexttoken == TK_IDENT || _nexttoken == TK_OPENBRACKET)) {
+		if ((_defining || _token == TK_IDENT) && (_nexttoken == TK_IDENT || _nexttoken == TK_OPENBRACKET)) {
 			// _func.addInst(PUSH, _func.getStringValue(_string));
 			// defStart();
 			defTypeString(_string);
@@ -274,8 +306,16 @@ public class ScoreCompiler {
 		
 		switch (_token) {
 			case TK_EQUALS: {
+				// first do checks that actually DO assign to expressions.
+				if (_func.getLastOp() == GETLENGTH) {
+					_func.popInst();
+					lex(); factor();
+					_func.addInst(SETLENGTH);
+					break;
+				}
+				
 				if (_es._type == EXPR)
-					throw new CompilerException("Cannot assign to an expression.");
+					throw new CompilerException("Cannot assign to that kind of expression (assignable expressions include array indexes and resizes, not for definitions though).");
 				
 				_func.popInst(); // Pop the get inst thingy (get)
 				lex(); factor();
@@ -413,6 +453,11 @@ public class ScoreCompiler {
 				_func.addInst(i1); 	_func.addInst(i0);
 				break;
 			}
+			case TK_HASH:
+				lex(); load();
+				_es._type = EXPR;
+				_func.addInst(GETLENGTH);
+				break;
 			case TK_TRUE:
 			case TK_FALSE:
 				_func.addInst(PUSH, _func.getBoolValue(_token == TK_TRUE ? true : false));
@@ -442,8 +487,8 @@ public class ScoreCompiler {
 			case TK_NEW: {
 				lex();
 				ScoreObject newWhat = expect(TK_IDENT);
+				_es._type = EXPR;
 				if (_token == TK_OPENBRACKET) {
-					_es._type = EXPR;
 					lex();
 					if (_token != TK_CLOSEBRACKET)
 						load(); // the size
@@ -456,10 +501,13 @@ public class ScoreCompiler {
 						if (_token != TK_CLOSEBRACE)
 							numArrayVals = commaExpr();
 						expect(TK_CLOSEBRACE);
+						expect(TK_SEMICOLON); // because at this point the checkSemi method won't do it for us because of the }.
 					}
 					_func.addInst(MKARRAY, _func.getValue(newWhat), numArrayVals);
-					expect(TK_SEMICOLON); // because at this point the checkSemi method won't do it for us because of the }.
-				} // else if open paren
+				} else if (_token == TK_OPENPAREN) {
+					// don't need to expect the semicolon here, don't worry.
+				} else
+					throw new CompilerException("'[' or '(' expected when creating a new object.");
 				break;
 			}
 			case TK_IDENT: {
@@ -468,6 +516,10 @@ public class ScoreCompiler {
 				_func.addInst(PUSH, _func.getStringValue(ident));
 				_func.addInst(GET);
 				switch (_token) {
+					case TK_OPENBRACKET:
+						lex(); expression(); expect(TK_CLOSEBRACKET);
+						_func.addInst(GETINDEX);
+						break;
 					case TK_PLUSPLUS:
 						lex();
 						_func.addInst(PUSH, _func.getStringValue(ident));

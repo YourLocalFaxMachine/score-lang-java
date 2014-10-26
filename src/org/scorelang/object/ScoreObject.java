@@ -632,6 +632,10 @@ public class ScoreObject {
 		return _isArray;
 	}
 	
+	public ScoreValue getValue() {
+		return _value;
+	}
+	
 	// To String
 	
 	public String valueString() {

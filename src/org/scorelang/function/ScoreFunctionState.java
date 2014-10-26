@@ -76,6 +76,10 @@ public class ScoreFunctionState {
 	
 	// Instructions
 	
+	public byte getLastOp() {
+		return _inst.top().getOp();
+	}
+	
 	public int addInst(byte op) {
 		_inst.push(new ScoreInstruction(op));
 		return _inst.size() - 1;

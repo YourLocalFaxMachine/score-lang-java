@@ -152,6 +152,12 @@ public class ScoreVM {
 					// System.out.println("Getting " + name);
 					break;
 				}
+				case GETINDEX: {
+					ScoreObject idx = pop();
+					ScoreObject val = pop(); // the object (gotten by GET)
+					push(getindex(val, idx));
+					break;
+				}
 				case SET: {
 					ScoreObject val = pop();
 					ScoreObject name = pop();
@@ -170,6 +176,16 @@ public class ScoreVM {
 				case UNM:
 					push(opunm(pop()));
 					break;
+				case GETLENGTH:
+					push(lengthof(pop()));
+					break;
+				case SETLENGTH: {
+					ScoreObject len = pop();
+					ScoreObject val = pop();
+					setlength(val, len);
+					push(len);
+					break;
+				}
 				case ADD:
 				case SUB:
 				case MUL:
@@ -524,6 +540,29 @@ public class ScoreVM {
 			// Add type casting to objects
 			default: throw new ScoreException("Cannot perform unary minus on type " + vType + "!");
 		}
+	}
+	
+	private ScoreObject getindex(ScoreObject val, ScoreObject idx) {
+		// do indexing of arrays, then check types and stuff later when I add them.
+		if (val.isArray()) {
+			if (!idx.isInt())
+				throw new ScoreException("Can only index an array with an int.");
+			return new ScoreObject(((ScoreValueArray) val.getValue()).get((int) idx.getInt()));
+		}
+		return new ScoreObject();
+	}
+	
+	private ScoreObject lengthof(ScoreObject val) {
+		// do indexing of arrays, then check types and stuff later when I add them.
+		if (val.isArray())
+			return new ScoreObject(((ScoreValueArray) val.getValue()).size());
+		return new ScoreObject();
+	}
+	
+	private void setlength(ScoreObject val, ScoreObject len) {
+		if (val.isArray())
+			((ScoreValueArray) val.getValue()).setLength((int) len.getInt());
+		else throw new ScoreException("Cannot set the length of '" + val.getTypeName() + "'.");
 	}
 	
 	private String repString(String str, long amt) {

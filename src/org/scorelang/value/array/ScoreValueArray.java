@@ -1,5 +1,6 @@
 package org.scorelang.value.array;
 
+import org.scorelang.object.ScoreObject;
 import org.scorelang.util.ScoreVector;
 import org.scorelang.value.ScoreValue;
 
@@ -25,12 +26,27 @@ public abstract class ScoreValueArray<T extends ScoreValue> implements ScoreValu
         return res;
     }
     
+    protected abstract ScoreObject getDefaultValue();
+    
+	@SuppressWarnings("unchecked")
+    public void setLength(int len) {
+        int oldsize = size();
+        _values.setSize(len);
+        if (len > oldsize)
+            for (int i = oldsize; i < len; i++)
+                _values.set(i, (T) getDefaultValue().getValue());
+    }
+    
     public void push(T value) {
         _values.push(value);
     }
     
     public T pop() {
         return _values.pop();
+    }
+    
+    public T get(int idx) {
+        return _values.get(idx);
     }
     
     public int size() {

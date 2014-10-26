@@ -24,6 +24,11 @@ public class ScoreFloatArray extends ScoreValueArray<ScoreFloat> {
         this();
         set(values);
     }
+    
+    @Override
+    protected ScoreObject getDefaultValue() {
+    	return new ScoreObject(0.0);
+    }
 	
 	@Override
 	public byte getType() {

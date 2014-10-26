@@ -37,6 +37,11 @@ public class ScoreVector<T> {
 		_size = 0;
 	}
 	
+	public void setSize(int size) {
+		resize(size);
+		_size = size;
+	}
+	
 	// Push
 	
 	public int push(T value) {
@@ -63,6 +68,20 @@ public class ScoreVector<T> {
 		if (idx < 0 || idx >= _size)
 			throw new IndexOutOfBoundsException(Integer.toString(idx));
 		return (T) _data[idx];
+	}
+	
+	@SuppressWarnings("unchecked")
+	public T top() {
+		return (T) _data[_size - 1];
+	}
+	
+	// Set
+	
+	@SuppressWarnings("unchecked")
+	public void set(int idx, T value) {
+		if (idx < 0 || idx >= _size)
+			throw new IndexOutOfBoundsException(Integer.toString(idx));
+		_data[idx] = value;
 	}
 	
 	// Getters
