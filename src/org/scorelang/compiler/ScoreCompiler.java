@@ -351,10 +351,15 @@ public class ScoreCompiler {
 					_func.popInst(); // Pop the get inst thingy (get)
 					// For now push null, We'll do things soon
 					switch (_typeString) {
+						case "var":
+							if (_array)
+								_func.addInst(PUSH, _func.getValue(new ScoreVarArray()));
+							else _func.addInst(PUSHNULL);
+							break;
 						case "bool":
-						if (_array)
+							if (_array)
 								_func.addInst(PUSH, _func.getValue(new ScoreBoolArray()));
-							else 	_func.addInst(PUSH, _func.getBoolValue(false));
+							else _func.addInst(PUSH, _func.getBoolValue(false));
 							break;
 						case "char":
 							if (_array)
@@ -505,12 +510,12 @@ public class ScoreCompiler {
 				lex();
 				ScoreObject newWhat = expect(TK_IDENT);
 				_es._type = EXPR;
-				if (_token == TK_OPENBRACKET) {
+				if (_token == TK_OPENBRACKET || _token == TK_BRACKETS) {
 					lex();
-					if (_token != TK_CLOSEBRACKET)
+					if (_pretoken == TK_OPENBRACKET) { // if there's a closed one (and therefore no size) then this won't happen
 						load(); // the size
-					else _func.addInst(PUSH, _func.getNumericValue(-1));
-					expect(TK_CLOSEBRACKET);
+						expect(TK_CLOSEBRACKET);
+					} else _func.addInst(PUSH, _func.getNumericValue(-1));
 					// now check for initializer
 					int numArrayVals = -1;
 					if (_token == TK_OPENBRACE) {
@@ -587,6 +592,7 @@ public class ScoreCompiler {
 		int ifEnd = _func.getCurrentInstPos();
 		
 		if (_token == TK_ELSE) {
+			lex();
 			hasElse = true;
 			
 			int elseStart = _func.addInst(JMP, 0); // 0 is the amount to jump so far
@@ -663,7 +669,11 @@ public class ScoreCompiler {
 		expression(); expect(TK_CLOSEPAREN);
 		int jmpfpos = _func.addInst(JMPF, 0);
 		
+		// BREAKABLE
+		
 		statement();
+		
+		// NO BREAKABLE
 		
 		_func.addInst(JMP, jmppos - _func.getCurrentInstPos() - 1);
 		_func.setInstArg(jmpfpos, 0, _func.getCurrentInstPos() - jmpfpos);

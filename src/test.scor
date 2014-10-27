@@ -1,9 +1,28 @@
-int[] arr = new int[10];
+final var[] argv;
+int n;
 
-print arr, "turns into ";
+if (#argv != 0) {
+	n = (int) argv[0];
+	if (n < 1)
+		n = 1;
+} else n = 1;
 
-for (int i = 0; i < #arr; i++)
-    arr[i] = (i + 1) * 2;
-arr = ~arr[0,#arr / 4 * 3];
+// These arrays are initialized to 0-length int arrays.
+int[] x;
+int[] y;
 
-println arr;
+// This is the easiest way to resize an array.
+// The # operator is used to return the length/size of an object, but assigning to it invokes a resize operation.
+#x = n;
+#y = n;
+
+for (int i = 0; i < n; i++) {
+	x[i] = i + 1;
+	y[i] = 0;
+}
+
+for (int j = 0; j < n; j++)
+	for (int i = n-1; i >= 0; i--)
+		y[i] = y[i] + x[i];
+
+println y[0], y[n - 1];

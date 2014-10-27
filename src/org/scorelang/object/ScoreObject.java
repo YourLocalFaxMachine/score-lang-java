@@ -196,6 +196,7 @@ public class ScoreObject {
 			case INT:			return "int";
 			case ROUT:			return "rout";
 			case STRING:		return "string";
+			case VAR_ARRAY:		return "var[]";
 			case BOOL_ARRAY:	return "bool[]";
 			case CHAR_ARRAY:	return "char[]";
 			case FLOAT_ARRAY:	return "float[]";

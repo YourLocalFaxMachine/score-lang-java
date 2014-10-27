@@ -136,7 +136,6 @@ public class ScoreVM {
 					ScoreObject val = pop();
 					ScoreObject name = pop();
 					ScoreObject type = pop();
-					// TODO arrays don't exist yet, so this sets everything to NOT AN ARRAY: FIX SOON
 					if (op == ASSIGN && _scope == null) {
 						_root.assign(name.getString(), val, type.getString(), arg0 == 1 ? true : false, arg1 == 1 ? true : false, arg2 == 1 ? true : false);
 						// System.out.println("ASSIGN type " + type + " - name "  + name + " - val " + val);
@@ -371,20 +370,15 @@ public class ScoreVM {
 	}
 	
 	private ScoreTable getLocalTable(String name) {
-		ScoreTable t = _root;
 		Scope s = _scope;
 		for (;;) {
-			if (s == null) {
-				t = _root;
+			if (s == null)
 				break;
-			}
-			if (s.hasVar(name)) {
-				t = s._locals;
-				break;
-			} else
-				s = s._parent;
+			if (s.hasVar(name))
+				return s._locals;
+			else s = s._parent;
 		}
-		return t;
+		return _root;
 	}
 	
 	// Object manipulations
@@ -403,23 +397,9 @@ public class ScoreVM {
 	}
 	
 	private String asString(ScoreObject obj) {
-		switch (obj.getType()) {
-			case BOOL:
-			case CHAR:
-			case FLOAT:
-			case INT:
-			case ROUT:
-			case STRING:
-			case VAR_ARRAY:
-			case BOOL_ARRAY:
-			case CHAR_ARRAY:
-			case FLOAT_ARRAY:
-			case INT_ARRAY:
-			case ROUT_ARRAY:
-			case STRING_ARRAY:
-				return obj.valueString();
-		}
-		return "null";
+		if (obj.isNull())
+			return null;
+		return obj.valueString();
 	}
 	
 	// Operations
