@@ -3,13 +3,9 @@ println "Running";
 for (int i = 0; i < 100; i++) {
 	if (i % 2 != 0)
 		continue;
-	if (i > 50) {
-		println "NOW BREAK";
+	if (i > 50) 
 		break;
-	}
 	println i;
 }
 
 println "Here we are";
-println "And now here";
-println "And then here";

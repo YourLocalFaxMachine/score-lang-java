@@ -98,7 +98,7 @@ public class ScoreCompiler {
 		if (!_bcTarg._continueTargets.isEmpty())
 			for (int i = 0; i < _bcTarg._continueTargets.size(); i++) {
 				int targ = _bcTarg._continueTargets.get(i);
-				_func.setInstArg(targ, 0, targ - continueTarg + 1);
+				_func.setInstArg(targ, 0, targ - continueTarg);
 			}
 		_bcTarg = _bcTarg._parent;
 	}
