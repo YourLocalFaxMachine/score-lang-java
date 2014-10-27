@@ -88,12 +88,12 @@ public class ScoreVector<T> {
 	
 	public ScoreVector<T> sub(int start, int end) {
 		ScoreVector<T> res = new ScoreVector<T>(_capacity);
-		for (int i = start; i < end; i++)
+		for (int i = start; i <= end; i++)
 			res.push(get(i));
 		return res;
 	}
 	
-	public ScoreVector<T> rev() {
+	public ScoreVector<T> reverse() {
 		ScoreVector<T> res = new ScoreVector<T>(_capacity);
 		for (int i = 0; i < _size; i++)
 			res.push(get(_size - i - 1));

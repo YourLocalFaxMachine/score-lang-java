@@ -1,11 +1,13 @@
-final var[] argv;
+var[] argv = new var[] { 3 };
 int n;
 
 if (#argv != 0) {
-	n = (int) argv[0];
+	n = <int> argv[0];
 	if (n < 1)
 		n = 1;
 } else n = 1;
+
+println "n =", n;
 
 // These arrays are initialized to 0-length int arrays.
 int[] x;

@@ -5,7 +5,7 @@ import static org.scorelang.vm.ScoreOpCode.*;
 
 import org.scorelang.ScoreException;
 import org.scorelang.function.*;
-import org.scorelang.lexer.ScoreLexer;
+import org.scorelang.lexer.*;
 import org.scorelang.object.ScoreObject;
 import org.scorelang.util.ScoreVector;
 import org.scorelang.value.array.*;
@@ -31,6 +31,26 @@ public class ScoreCompiler {
 		
 	}
 	
+	private static final class BCTarget {
+		
+		private BCTarget _parent;
+		private ScoreVector<Integer> _breakTargets;
+		private ScoreVector<Integer> _continueTargets;
+		
+		public BCTarget(BCTarget parent) {
+			_parent = parent;
+		}
+		
+		public void addBreakTarget(int targ) {
+			_breakTargets.push(targ);
+		}
+		
+		public void addContinueTarget(int targ) {
+			_continueTargets.push(targ);
+		}
+		
+	}
+	
 	private final class CompilerException extends ScoreException {
 		
 		public CompilerException(String message) {
@@ -44,6 +64,7 @@ public class ScoreCompiler {
 	private ScoreLexer _lexer;
 	private ScoreFunctionState _func;
 	private ExpState _es;
+	private BCTarget _bcTarg;
 	
 	// Tokens and stuff
 	
@@ -60,6 +81,30 @@ public class ScoreCompiler {
 	
 	public ScoreCompiler(InputStream input) {
 		_lexer = new ScoreLexer(input);
+	}
+	
+	private void startBCTarget() {
+		_bcTarg = new BCTarget(_bcTarg);
+	}
+	
+	private void endBCTarget(int breakTarg, int continueTarg) {
+		for (int i = 0; i < _bcTarg._breakTargets.size(); i++)
+			_func.setInstArg(_bcTarg._breakTargets.get(i), 0, breakTarg);
+		for (int i = 0; i < _bcTarg._continueTargets.size(); i++)
+			_func.setInstArg(_bcTarg._continueTargets.get(i), 0, continueTarg);
+		_bcTarg = _bcTarg._parent;
+	}
+	
+	private void addBreakTarget(int targ) {
+		if (_bcTarg == null)
+			throw new CompilerException("No breakable statement, cannot break.");
+		_bcTarg.addBreakTarget(targ);
+	}
+	
+	private void addContinueTarget(int targ) {
+		if (_bcTarg == null)
+			throw new CompilerException("No continueable statement, cannot continue.");
+		_bcTarg.addContinueTarget(targ);
 	}
 	
 	// Lexer
@@ -300,11 +345,10 @@ public class ScoreCompiler {
 		if (_defining && _es._type == EXPR)
 			throw new CompilerException("Cannot use an expression as a variable name.");
 		
-		if (_token == TK_OPENBRACKET) {
+		if (_token == TK_BRACKETS) {
 			if (_array)
 				throw new CompilerException("Already defining as an array. Use \"type[] name\" or \"type name[]\", but not both.");
-			lex(); expect(TK_CLOSEBRACKET);
-			defArray();
+			lex(); defArray();
 		}
 		
 		tk_switch:
@@ -353,32 +397,32 @@ public class ScoreCompiler {
 					switch (_typeString) {
 						case "var":
 							if (_array)
-								_func.addInst(PUSH, _func.getValue(new ScoreVarArray()));
+								_func.addInst(PUSH, _func.getValue(new ScoreValueArray()));
 							else _func.addInst(PUSHNULL);
 							break;
 						case "bool":
 							if (_array)
-								_func.addInst(PUSH, _func.getValue(new ScoreBoolArray()));
+								_func.addInst(PUSH, _func.getValue(new ScoreValueArray(ScoreKeywords.getKeyword("bool"))));
 							else _func.addInst(PUSH, _func.getBoolValue(false));
 							break;
 						case "char":
 							if (_array)
-								_func.addInst(PUSH, _func.getValue(new ScoreCharArray()));
+								_func.addInst(PUSH, _func.getValue(new ScoreValueArray(ScoreKeywords.getKeyword("char"))));
 							else _func.addInst(PUSH, _func.getCharValue('\u0000'));
 							break;
 						case "float":
 							if (_array)
-								_func.addInst(PUSH, _func.getValue(new ScoreFloatArray()));
+								_func.addInst(PUSH, _func.getValue(new ScoreValueArray(ScoreKeywords.getKeyword("float"))));
 							else _func.addInst(PUSH, _func.getNumericValue(0.0));
 							break;
 						case "int":
 							if (_array)
-								_func.addInst(PUSH, _func.getValue(new ScoreIntArray()));
+								_func.addInst(PUSH, _func.getValue(new ScoreValueArray(ScoreKeywords.getKeyword("int"))));
 							else _func.addInst(PUSH, _func.getNumericValue(0));
 							break;
 						case "string":
 							if (_array)
-								_func.addInst(PUSH, _func.getValue(new ScoreStringArray()));
+								_func.addInst(PUSH, _func.getValue(new ScoreValueArray(ScoreKeywords.getKeyword("string"))));
 							else _func.addInst(PUSH, _func.getStringValue(""));
 							break;
 						default: _func.addInst(PUSHNULL);
@@ -645,21 +689,23 @@ public class ScoreCompiler {
 		}
 		
 		// BREAKABLE
-		
-		statement();
+		startBCTarget(); statement();
 		
 		if (incSize > 0) {
 			for (int i = 0; i < incSize; i++)
 				_func.addInst(inc.get(i));
 		}
 		
-		_func.addInst(JMP, jmppos - _func.getCurrentInstPos() - 1);
+		int bTarg, cTarg;
+		
+		_func.addInst(JMP, cTarg = jmppos - _func.getCurrentInstPos() - 1);
 		if (jmpfpos > 0)
-			_func.setInstArg(jmpfpos, 0, _func.getCurrentInstPos() - jmpfpos);
+			_func.setInstArg(jmpfpos, 0, bTarg = _func.getCurrentInstPos() - jmpfpos);
 			
 		endScope();
 		
 		// NO BREAKABLE
+		endBCTarget(bTarg, cTarg);
 	}
 	
 	private void whileStatement() {
@@ -670,13 +716,15 @@ public class ScoreCompiler {
 		int jmpfpos = _func.addInst(JMPF, 0);
 		
 		// BREAKABLE
+		startBCTarget(); statement();
 		
-		statement();
+		int bTarg, cTarg;
+		
+		_func.addInst(JMP, cTarg = jmppos - _func.getCurrentInstPos() - 1);
+		_func.setInstArg(jmpfpos, 0, bTarg = _func.getCurrentInstPos() - jmpfpos);
 		
 		// NO BREAKABLE
-		
-		_func.addInst(JMP, jmppos - _func.getCurrentInstPos() - 1);
-		_func.setInstArg(jmpfpos, 0, _func.getCurrentInstPos() - jmpfpos);
+		endBCTarget(bTarg, cTarg);
 	}
 	
 	private void factor() {

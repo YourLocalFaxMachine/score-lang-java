@@ -11,10 +11,11 @@ public class ScoreKeywords {
 	
 	private static class Keyword {
 		
-		private final String _word;
+		private final String _id, _word;
 		private final int _token;
 		
-		public Keyword(String word, int token) {
+		public Keyword(String id, String word, int token) {
+			_id = id;
 			_word = word;
 			_token = token;
 		}
@@ -24,7 +25,17 @@ public class ScoreKeywords {
 	private static final HashMap<String, Keyword> _keywords = new HashMap<String, Keyword>();
 	
 	private static final void addKeyword(String id, String word, int token) {
-		_keywords.put(id, new Keyword(word, token));
+		_keywords.put(id, new Keyword(id, word, token));
+	}
+	
+	public static final String getIDFromKeyword(String word) {
+		if (word == null || word.trim().equals(""))
+			return null;
+		Collection<Keyword> v = _keywords.values();
+		for (Keyword k : v)
+			if (word.equals(k._word))
+				return k._id;
+		return null;
 	}
 	
 	public static final String getKeyword(String id) {
@@ -46,6 +57,14 @@ public class ScoreKeywords {
 	}
 	
 	static {
+		addKeyword("var",		"var",		TK_IDENT);
+		addKeyword("bool",		"bool",		TK_IDENT);
+		addKeyword("char",		"char",		TK_IDENT);
+		addKeyword("float",		"float",	TK_IDENT);
+		addKeyword("int",		"int",		TK_IDENT);
+		addKeyword("rout",		"rout",		TK_IDENT);
+		addKeyword("string",	"string",	TK_IDENT);
+		
 		addKeyword("true",		"true",		TK_TRUE);
 		addKeyword("false",		"false",	TK_FALSE);
 		addKeyword("if",		"if",		TK_IF);

@@ -7,7 +7,7 @@ import static org.scorelang.vm.ScoreOpCode.*;
 import org.scorelang.ScoreException;
 import org.scorelang.function.ScoreFunction;
 import org.scorelang.object.ScoreObject;
-import org.scorelang.util.ScoreVector;
+import org.scorelang.util.*;
 import org.scorelang.value.*;
 import org.scorelang.value.array.*;
 
@@ -284,61 +284,11 @@ public class ScoreVM {
 					else if (size != arg1 && arg1 != -1)
 						throw new ScoreException("Defined array size and default array length do not match.");
 					String type = t.getString(); // must be string
-					ScoreObject arr;
-					switch (type) {
-						case "bool":
-							if (arg1 == -1) { // NO defaults
-								arr = new ScoreObject(new ScoreBoolArray(size));
-							} else {
-								ScoreBool[] v = new ScoreBool[vals.length];
-								for (int j = 0; j < vals.length; j++)
-									v[j] = new ScoreBool(vals[vals.length - j - 1].getAsBool());
-								arr = new ScoreObject(new ScoreBoolArray(v));
-							}
-							break;
-						case "char":
-							if (arg1 == -1) { // NO defaults
-								arr = new ScoreObject(new ScoreCharArray(size));
-							} else {
-								ScoreChar[] v = new ScoreChar[vals.length];
-								for (int j = 0; j < vals.length; j++)
-									v[j] = new ScoreChar(vals[vals.length - j - 1].getAsChar());
-								arr = new ScoreObject(new ScoreCharArray(v));
-							}
-							break;
-						case "float":
-							if (arg1 == -1) { // NO defaults
-								arr = new ScoreObject(new ScoreFloatArray(size));
-							} else {
-								ScoreFloat[] v = new ScoreFloat[vals.length];
-								for (int j = 0; j < vals.length; j++)
-									v[j] = new ScoreFloat(vals[vals.length - j - 1].getAsFloat());
-								arr = new ScoreObject(new ScoreFloatArray(v));
-							}
-							break;
-						case "int":
-							if (arg1 == -1) { // NO defaults
-								arr = new ScoreObject(new ScoreIntArray(size));
-							} else {
-								ScoreInt[] v = new ScoreInt[vals.length];
-								for (int j = 0; j < vals.length; j++)
-									v[j] = new ScoreInt(vals[vals.length - j - 1].getAsInt());
-								arr = new ScoreObject(new ScoreIntArray(v));
-							}
-							break;
-						case "string":
-							if (arg1 == -1) { // NO defaults
-								arr = new ScoreObject(new ScoreStringArray(size));
-							} else {
-								ScoreString[] v = new ScoreString[vals.length];
-								for (int j = 0; j < vals.length; j++)
-									v[j] = new ScoreString(vals[vals.length - j - 1].getAsString());
-								arr = new ScoreObject(new ScoreStringArray(v));
-							}
-							break;
-						default: throw new ScoreException("Cannot create an array of type " + type + ".");
-					}
-					push(arr);
+					ScoreValueArray arr;
+					if (arg1 == -1) // NO defaults
+						arr = new ScoreValueArray(type, size);
+					else arr = new ScoreValueArray(type, vals);
+					push(new ScoreObject(arr));
 					break;
 				}
 				case PRINT:
@@ -555,14 +505,14 @@ public class ScoreVM {
 		if (val.isArray()) {
 			if (!idx.isInt())
 				throw new ScoreException("Can only index an array with an int.");
-			((ScoreValueArray) val.getValue()).set((int) idx.getInt(), obj);
+			((ScoreValueArray) val.getValue()).set((int) idx.getInt(), obj.getValue());
 		}
 	}
 	
 	private ScoreObject lengthof(ScoreObject val) {
 		// do indexing of arrays, then check types and stuff later when I add them.
 		if (val.isArray())
-			return new ScoreObject(((ScoreValueArray) val.getValue()).size());
+			return new ScoreObject(((ScoreValueArray) val.getValue()).length());
 		return new ScoreObject();
 	}
 	
@@ -574,13 +524,13 @@ public class ScoreVM {
 	
 	private ScoreObject subarray(ScoreObject val, ScoreObject start, ScoreObject end) {
 		if (val.isArray())
-			return ((ScoreValueArray) val.getValue()).subArray((int) start.getInt(), (int) end.getInt());
+			return new ScoreObject(((ScoreValueArray) val.getValue()).sub((int) start.getInt(), (int) end.getInt()));
 		throw new ScoreException("Cannot get a sub-array of '" + val.getTypeName() + "'.");
 	}
 	
 	private ScoreObject reverse(ScoreObject val) {
 		if (val.isArray())
-			return ((ScoreValueArray) val.getValue()).reverse();
+			return new ScoreObject(((ScoreValueArray) val.getValue()).reverse());
 		throw new ScoreException("Can't reverse type " + val.getTypeName() + ".");
 	}
 	
@@ -611,7 +561,7 @@ public class ScoreVM {
 			return new ScoreObject[0];
 		ScoreObject[] res = new ScoreObject[n];
 		for (int i = 0; i < n; i++)
-			res[i] = pop();
+			res[n - i - 1] = pop();
 		return res;
 	}
 	

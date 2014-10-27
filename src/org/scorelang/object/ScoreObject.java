@@ -1,7 +1,8 @@
 package org.scorelang.object;
 
-import org.scorelang.function.ScoreFunction;
 import org.scorelang.ScoreException;
+import org.scorelang.function.ScoreFunction;
+import org.scorelang.lexer.ScoreKeywords;
 import org.scorelang.util.ScoreVector;
 import org.scorelang.value.*;
 import org.scorelang.value.array.*;
@@ -247,30 +248,39 @@ public class ScoreObject {
 		return _type == BOOL_ARRAY;
 	}
 	
-	public ScoreBoolArray getBoolArrayValue() {
-		if (_type != BOOL_ARRAY)
-			throw new ScoreException("Object is not a bool[].");
-		return (ScoreBoolArray) _value;
-	}
+	// public ScoreBoolArray getBoolArrayValue() {
+	// 	if (_type != BOOL_ARRAY)
+	// 		throw new ScoreException("Object is not a bool[].");
+	// 	return (ScoreBoolArray) _value;
+	// }
 	
-	public ScoreBool[] getBoolArray() {
-		return getBoolArrayValue().get();
-	}
+	// public ScoreBool[] getBoolArray() {
+	// 	ScoreValueArray arr = getValueArray();
+	// 	ScoreBool[] res = new ScoreBool[arr.length()];
+	// 	for (int i = 0; i < res.length; i++)
+	// 		res[i] = (ScoreBool) arr.get(i);
+	// 	return res;
+	// }
 	
-	public boolean[] getBoolArrayBools() {
-		return getBoolArrayValue().getBools();
-	}
+	// public boolean[] getBoolArrayBools() {
+	// 	ScoreBool[] bools = getBoolArray();
+	// 	boolean[] res = new boolean[bools.length];
+	// 	for (int i = 0; i < res.length; i++)
+	// 		res[i] = bools[i].get();
+	// 	return res;
+	// }
 	
-	public void setBoolArray(ScoreBool[] values) {
+	public void setBoolArray(ScoreBool... values) {
 		if (_type == BOOL_ARRAY)
-			getBoolArrayValue().set(values);
-		else setValue(new ScoreBoolArray(values));
+			getValueArray().set(values);
+		else setValue(new ScoreValueArray(ScoreKeywords.getKeyword("bool"), values));
 	}
 	
-	public void setBoolArray(boolean[] values) {
-		if (_type == BOOL_ARRAY)
-			getBoolArrayValue().set(values);
-		else setValue(new ScoreBoolArray(values));
+	public void setBoolArray(boolean... values) {
+		ScoreBool[] res = new ScoreBool[values.length];
+		for (int i = 0; i < res.length; i++)
+			res[i] = new ScoreBool(values[i]);
+		setBoolArray(res);
 	}
 	
 	// Char
@@ -311,30 +321,31 @@ public class ScoreObject {
 		return _type == CHAR_ARRAY;
 	}
 	
-	public ScoreCharArray getCharArrayValue() {
-		if (_type != CHAR_ARRAY)
-			throw new ScoreException("Object is not a char[].");
-		return (ScoreCharArray) _value;
-	}
+	// public ScoreCharArray getCharArrayValue() {
+	// 	if (_type != CHAR_ARRAY)
+	// 		throw new ScoreException("Object is not a char[].");
+	// 	return (ScoreCharArray) _value;
+	// }
 	
-	public ScoreChar[] getCharArray() {
-		return getCharArrayValue().get();
-	}
+	// public ScoreChar[] getCharArray() {
+	// 	return getCharArrayValue().get();
+	// }
 	
-	public char[] getCharArrayChars() {
-		return getCharArrayValue().getChars();
-	}
+	// public char[] getCharArrayChars() {
+	// 	return getCharArrayValue().getChars();
+	// }
 	
-	public void setCharArray(ScoreChar[] values) {
+	public void setCharArray(ScoreChar... values) {
 		if (_type == CHAR_ARRAY)
-			getCharArrayValue().set(values);
-		else setValue(new ScoreCharArray(values));
+			getValueArray().set(values);
+		else setValue(new ScoreValueArray(ScoreKeywords.getKeyword("char"), values));
 	}
 	
-	public void setCharArray(char[] values) {
-		if (_type == CHAR_ARRAY)
-			getCharArrayValue().set(values);
-		else setValue(new ScoreCharArray(values));
+	public void setCharArray(char... values) {
+		ScoreChar[] res = new ScoreChar[values.length];
+		for (int i = 0; i < res.length; i++)
+			res[i] = new ScoreChar(values[i]);
+		setCharArray(res);
 	}
 	
 	// Float
@@ -375,30 +386,31 @@ public class ScoreObject {
 		return _type == FLOAT_ARRAY;
 	}
 	
-	public ScoreFloatArray getFloatArrayValue() {
-		if (_type != FLOAT_ARRAY)
-			throw new ScoreException("Object is not a float[].");
-		return (ScoreFloatArray) _value;
-	}
+	// public ScoreFloatArray getFloatArrayValue() {
+	// 	if (_type != FLOAT_ARRAY)
+	// 		throw new ScoreException("Object is not a float[].");
+	// 	return (ScoreFloatArray) _value;
+	// }
 	
-	public ScoreFloat[] getFloatArray() {
-		return getFloatArrayValue().get();
-	}
+	// public ScoreFloat[] getFloatArray() {
+	// 	return getFloatArrayValue().get();
+	// }
 	
-	public double[] getFloatArrayDoubles() {
-		return getFloatArrayValue().getDoubles();
-	}
+	// public double[] getFloatArrayDoubles() {
+	// 	return getFloatArrayValue().getDoubles();
+	// }
 	
-	public void setFloatArray(ScoreFloat[] values) {
+	public void setFloatArray(ScoreFloat... values) {
 		if (_type == FLOAT_ARRAY)
-			getFloatArrayValue().set(values);
-		else setValue(new ScoreFloatArray(values));
+			getValueArray().set(values);
+		else setValue(new ScoreValueArray(ScoreKeywords.getKeyword("float"), values));
 	}
 	
-	public void setFloatArray(double[] values) {
-		if (_type == FLOAT_ARRAY)
-			getFloatArrayValue().set(values);
-		else setValue(new ScoreFloatArray(values));
+	public void setFloatArray(double... values) {
+		ScoreFloat[] res = new ScoreFloat[values.length];
+		for (int i = 0; i < res.length; i++)
+			res[i] = new ScoreFloat(values[i]);
+		setFloatArray(res);
 	}
 	
 	// Int
@@ -439,30 +451,31 @@ public class ScoreObject {
 		return _type == INT_ARRAY;
 	}
 	
-	public ScoreIntArray getIntArrayValue() {
-		if (_type != INT_ARRAY)
-			throw new ScoreException("Object is not an int[].");
-		return (ScoreIntArray) _value;
-	}
+	// public ScoreIntArray getIntArrayValue() {
+	// 	if (_type != INT_ARRAY)
+	// 		throw new ScoreException("Object is not an int[].");
+	// 	return (ScoreIntArray) _value;
+	// }
 	
-	public ScoreInt[] getIntArray() {
-		return getIntArrayValue().get();
-	}
+	// public ScoreInt[] getIntArray() {
+	// 	return getIntArrayValue().get();
+	// }
 	
-	public long[] getIntArrayLongs() {
-		return getIntArrayValue().getLongs();
-	}
+	// public long[] getIntArrayLongs() {
+	// 	return getIntArrayValue().getLongs();
+	// }
 	
-	public void setIntArray(ScoreInt[] values) {
+	public void setIntArray(ScoreInt... values) {
 		if (_type == INT_ARRAY)
-			getIntArrayValue().set(values);
-		else setValue(new ScoreIntArray(values));
+			getValueArray().set(values);
+		else setValue(new ScoreValueArray(ScoreKeywords.getKeyword("int"), values));
 	}
 	
-	public void setIntArray(long[] values) {
-		if (_type == INT_ARRAY)
-			getIntArrayValue().set(values);
-		else setValue(new ScoreIntArray(values));
+	public void setIntArray(long... values) {
+		ScoreInt[] res = new ScoreInt[values.length];
+		for (int i = 0; i < res.length; i++)
+			res[i] = new ScoreInt(values[i]);
+		setIntArray(res);
 	}
 	
 	// Rout
@@ -493,20 +506,20 @@ public class ScoreObject {
 		return _type == ROUT_ARRAY;
 	}
 	
-	public ScoreRoutArray getRoutArrayValue() {
-		if (_type != ROUT_ARRAY)
-			throw new ScoreException("Object is not a rout[].");
-		return (ScoreRoutArray) _value;
-	}
+	// public ScoreRoutArray getRoutArrayValue() {
+	// 	if (_type != ROUT_ARRAY)
+	// 		throw new ScoreException("Object is not a rout[].");
+	// 	return (ScoreRoutArray) _value;
+	// }
 	
-	public ScoreRout[] getRoutArray() {
-		return getRoutArrayValue().get();
-	}
+	// public ScoreRout[] getRoutArray() {
+	// 	return getRoutArrayValue().get();
+	// }
 	
 	public void setRoutArray(ScoreRout[] values) {
 		if (_type == ROUT_ARRAY)
-			getRoutArrayValue().set(values);
-		else setValue(new ScoreRoutArray(values));
+			getValueArray().set(values);
+		else setValue(new ScoreValueArray(ScoreKeywords.getKeyword("rout"), values));
 	}
 	
 	// String
@@ -559,30 +572,31 @@ public class ScoreObject {
 		return _type == STRING_ARRAY;
 	}
 	
-	public ScoreStringArray getStringArrayValue() {
-		if (_type != STRING_ARRAY)
-			throw new ScoreException("Object is not a string[].");
-		return (ScoreStringArray) _value;
-	}
+	// public ScoreStringArray getStringArrayValue() {
+	// 	if (_type != STRING_ARRAY)
+	// 		throw new ScoreException("Object is not a string[].");
+	// 	return (ScoreStringArray) _value;
+	// }
 	
-	public ScoreString[] getStringArray() {
-		return getStringArrayValue().get();
-	}
+	// public ScoreString[] getStringArray() {
+	// 	return getStringArrayValue().get();
+	// }
 	
-	public String[] getStringArrayStrings() {
-		return getStringArrayValue().getStrings();
-	}
+	// public String[] getStringArrayStrings() {
+	// 	return getStringArrayValue().getStrings();
+	// }
 	
-	public void setStringArray(ScoreString[] values) {
-		if (_type == INT_ARRAY)
-			getStringArrayValue().set(values);
-		else setValue(new ScoreStringArray(values));
-	}
-	
-	public void setStringArray(String[] values) {
+	public void setStringArray(ScoreString... values) {
 		if (_type == STRING_ARRAY)
-			getStringArrayValue().set(values);
-		else setValue(new ScoreStringArray(values));
+			getValueArray().set(values);
+		else setValue(new ScoreValueArray(ScoreKeywords.getKeyword("string"), values));
+	}
+	
+	public void setBoolArray(String... values) {
+		ScoreString[] res = new ScoreString[values.length];
+		for (int i = 0; i < res.length; i++)
+			res[i] = new ScoreString(values[i]);
+		setStringArray(res);
 	}
 	
 	// Var Array
@@ -591,20 +605,20 @@ public class ScoreObject {
 		return _type == VAR_ARRAY;
 	}
 	
-	public ScoreVarArray getVarArrayValue() {
-		if (_type != VAR_ARRAY)
-			throw new ScoreException("Object is not a var[].");
-		return (ScoreVarArray) _value;
-	}
+	// public ScoreVarArray getVarArrayValue() {
+	// 	if (_type != VAR_ARRAY)
+	// 		throw new ScoreException("Object is not a var[].");
+	// 	return (ScoreVarArray) _value;
+	// }
 	
-	public ScoreValue[] getVarArray() {
-		return getVarArrayValue().get();
-	}
+	// public ScoreValue[] getVarArray() {
+	// 	return getVarArrayValue().get();
+	// }
 	
-	public void setVarArray(ScoreValue[] values) {
+	public void setVarArray(ScoreValue... values) {
 		if (_type == VAR_ARRAY)
-			getVarArrayValue().set(values);
-		else setValue(new ScoreVarArray(values));
+			getValueArray().set(values);
+		else setValue(new ScoreValueArray(values));
 	}
 	
 	// Value
@@ -635,6 +649,12 @@ public class ScoreObject {
 	
 	public ScoreValue getValue() {
 		return _value;
+	}
+	
+	public ScoreValueArray getValueArray() {
+		if (!_isArray)
+			throw new ScoreException("Value is not an array!");
+		return (ScoreValueArray) _value;
 	}
 	
 	// To String
