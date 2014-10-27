@@ -206,7 +206,8 @@ public class ScoreVM {
 				case ADD:
 				case SUB:
 				case MUL:
-				case DIV: {
+				case DIV:
+				case MOD: {
 					ScoreObject b = pop();
 					ScoreObject a = pop();
 					push(binop(op, a, b));
@@ -305,6 +306,7 @@ public class ScoreVM {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+				default: throw new ScoreException("Unexpected operation: " + op + ".");
 			}
 		}
 		
@@ -395,6 +397,7 @@ public class ScoreVM {
 			case SUB: return subop(a, b);
 			case MUL: return mulop(a, b);
 			case DIV: return divop(a, b);
+			case MOD: return modop(a, b);
 		}
 		throw new ScoreException("Invalid operation.");
 	}
@@ -423,7 +426,7 @@ public class ScoreVM {
 			// must both be chars then
 			else return new ScoreObject(a.getChar() - b.getChar());
 		}
-		throw new ScoreException("Cannot add type " + b.getTypeName() + " to type " + a.getTypeName() + ".");
+		throw new ScoreException("Cannot sub type " + b.getTypeName() + " from type " + a.getTypeName() + ".");
 	}
 	
 	private ScoreObject mulop(ScoreObject a, ScoreObject b) {
@@ -439,7 +442,7 @@ public class ScoreVM {
 			else if (a.isInt() && b.isString())
 				return new ScoreObject(repString(b.getString(), a.getInt()));
 		}
-		throw new ScoreException("Cannot add type " + b.getTypeName() + " to type " + a.getTypeName() + ".");
+		throw new ScoreException("Cannot mul type " + a.getTypeName() + " by type " + b.getTypeName() + ".");
 	}
 	
 	private ScoreObject divop(ScoreObject a, ScoreObject b) {
@@ -450,7 +453,18 @@ public class ScoreVM {
 			else if (a.isInt() && b.isInt())
 				return new ScoreObject(a.getInt() / b.getInt());
 		}
-		throw new ScoreException("Cannot add type " + b.getTypeName() + " to type " + a.getTypeName() + ".");
+		throw new ScoreException("Cannot div type " + a.getTypeName() + " by type " + b.getTypeName() + ".");
+	}
+	
+	private ScoreObject modop(ScoreObject a, ScoreObject b) {
+		if (a.isNumeric() && b.isNumeric()) {
+			if (a.isFloat() || b.isFloat())
+				return new ScoreObject(a.getAsFloat() % b.getAsFloat());
+			// must both be int then
+			else if (a.isInt() && b.isInt())
+				return new ScoreObject(a.getInt() % b.getInt());
+		}
+		throw new ScoreException("Cannot mod type " + b.getTypeName() + " with type " + a.getTypeName() + ".");
 	}
 	
 	private ScoreObject absop(ScoreObject val) {

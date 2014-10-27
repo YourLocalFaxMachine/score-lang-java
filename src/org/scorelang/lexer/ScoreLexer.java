@@ -170,6 +170,13 @@ public class ScoreLexer {
 						continue;
 					}
 					return TK_DIV;
+				case '%':
+					read();
+					if (_val == '=') {
+						read();
+						return TK_MODEQ;
+					}
+					return TK_MOD;
 				case '(':
 					read();
 					return TK_OPENPAREN;

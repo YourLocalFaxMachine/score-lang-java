@@ -39,6 +39,8 @@ public class ScoreCompiler {
 		
 		public BCTarget(BCTarget parent) {
 			_parent = parent;
+			_breakTargets = new ScoreVector<Integer>();
+			_continueTargets = new ScoreVector<Integer>();
 		}
 		
 		public void addBreakTarget(int targ) {
@@ -88,10 +90,16 @@ public class ScoreCompiler {
 	}
 	
 	private void endBCTarget(int breakTarg, int continueTarg) {
-		for (int i = 0; i < _bcTarg._breakTargets.size(); i++)
-			_func.setInstArg(_bcTarg._breakTargets.get(i), 0, breakTarg);
-		for (int i = 0; i < _bcTarg._continueTargets.size(); i++)
-			_func.setInstArg(_bcTarg._continueTargets.get(i), 0, continueTarg);
+		if (!_bcTarg._breakTargets.isEmpty())
+			for (int i = 0; i < _bcTarg._breakTargets.size(); i++) {
+				int targ = _bcTarg._breakTargets.get(i);
+				_func.setInstArg(targ, 0, breakTarg - targ + 1);
+			}
+		if (!_bcTarg._continueTargets.isEmpty())
+			for (int i = 0; i < _bcTarg._continueTargets.size(); i++) {
+				int targ = _bcTarg._continueTargets.get(i);
+				_func.setInstArg(targ, 0, targ - continueTarg + 1);
+			}
 		_bcTarg = _bcTarg._parent;
 	}
 	
@@ -233,6 +241,12 @@ public class ScoreCompiler {
 				break;
 			case TK_WHILE:
 				whileStatement();
+				break;
+			case TK_BREAK:
+				lex(); addBreakTarget(_func.addInst(JMP, 0));
+				break;
+			case TK_CONTINUE:
+				lex(); addContinueTarget(_func.addInst(JMP, 0));
 				break;
 			case TK_PRINT:
 			case TK_PRINTLN: {
@@ -696,11 +710,10 @@ public class ScoreCompiler {
 				_func.addInst(inc.get(i));
 		}
 		
-		int bTarg, cTarg;
-		
-		_func.addInst(JMP, cTarg = jmppos - _func.getCurrentInstPos() - 1);
+		int bTarg = _func.getCurrentInstPos(), cTarg = jmppos;
+		_func.addInst(JMP, jmppos - _func.getCurrentInstPos() - 1);
 		if (jmpfpos > 0)
-			_func.setInstArg(jmpfpos, 0, bTarg = _func.getCurrentInstPos() - jmpfpos);
+			_func.setInstArg(jmpfpos, 0, _func.getCurrentInstPos() - jmpfpos);
 			
 		endScope();
 		
@@ -718,10 +731,10 @@ public class ScoreCompiler {
 		// BREAKABLE
 		startBCTarget(); statement();
 		
-		int bTarg, cTarg;
+		int bTarg = _func.getCurrentInstPos(), cTarg = jmppos;
 		
-		_func.addInst(JMP, cTarg = jmppos - _func.getCurrentInstPos() - 1);
-		_func.setInstArg(jmpfpos, 0, bTarg = _func.getCurrentInstPos() - jmpfpos);
+		_func.addInst(JMP, jmppos - _func.getCurrentInstPos() - 1);
+		_func.setInstArg(jmpfpos, 0, _func.getCurrentInstPos() - jmpfpos);
 		
 		// NO BREAKABLE
 		endBCTarget(bTarg, cTarg);

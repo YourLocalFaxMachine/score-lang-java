@@ -106,6 +106,10 @@ public class ScoreVector<T> {
 		return _size;
 	}
 	
+	public boolean isEmpty() {
+		return _size == 0;
+	}
+	
 	// To String
 	
 	@Override

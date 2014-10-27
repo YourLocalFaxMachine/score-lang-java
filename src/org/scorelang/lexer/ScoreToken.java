@@ -79,5 +79,7 @@ public class ScoreToken {
 	public static final int TK_COMMON			= 0x40;
 	public static final int TK_BRACKETS			= 0x41;
 	public static final int TK_TILDE			= 0x42;
+	public static final int TK_BITXOR			= 0x43;
+	public static final int TK_BITXOREQ			= 0x44;
 	
 }
